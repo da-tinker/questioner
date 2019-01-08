@@ -114,13 +114,16 @@ body {
 }
 
 /** User Form **/
+#user_form {
+    text-align: center
+}
 #user_form form {
-	float: right;
+    display: inline-block;
 	color: #5a4535;
 	height: 320px;
 	width: 420px;
 	border: 1px solid #5a4535;
-	padding: 19px 19px 6px;
+	padding: 10px;
 }
 #user_form form table {
 	border-collapse: collapse;
