@@ -4,46 +4,10 @@
 	<meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Questioner - Login</title>
-	<link rel="stylesheet" href="css/style.css" type="text/css">
+	<link rel="stylesheet" href="css/main.css" type="text/css">
+    <link rel="stylesheet" href="css/login.css" type="text/css">
 </head>
 <body>
-<!--
-	<div id="background">
-		<div id="page">
-			<div id="header">
-                Questioner
-			</div>
-			<div id="contents">
-				<div class="box">
-					<div>
-						<div id="user_form" class="body">
-							<h1>Log in</h1>
-							<form action="index.html" method="post">
-								<table>
-									<tbody>
-										<tr>
-											<td>Username:</td>
-											<td><input type="text" value="" class="txtfield"></td>
-										</tr> <tr>
-											<td>Password:</td>
-											<td><input type="text" value="" class="txtfield"></td>
-										</tr> <tr>                                        
-											<td></td>
-											<td><input type="submit" value="Log in" class="btn"></td>
-										</tr>
-									</tbody>
-								</table>
-							</form>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div id="footer">
-            <p>Copyright &copy 2019 by <a href="">Matt</a></p>
-		</div>
-	</div>
--->
     <div class="wrapper">
         <div class="header">
             <p>
@@ -51,30 +15,34 @@
             </p>          
         </div>
         <div class="content">
-            <div id="user_form">
-                <h1>Log in</h1>
-                <form action="" method="post">
-                    <table>
-                        <tbody>
-                            <tr>
-                                <td>Username:</td>
-                                <td><input type="text" value="" class="txtfield"></td>
-                            </tr> <tr>
-                                <td>Password:</td>
-                                <td><input type="text" value="" class="txtfield"></td>
-                            </tr> <tr>                                        
-                                <td></td>
-                                <td><input type="submit" value="Log in"></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </form>
+            <div class="userform">
+              <form action="">
+                  <div class="row">
+                    <div class="col-25">
+                      <label for="username">Username</label>
+                    </div>
+                    <div class="col-75">
+                      <input type="text" id="username" name="username" placeholder="Enter username. .">
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-25">
+                      <label for="password">Password</label>
+                    </div>
+                    <div class="col-75">
+                      <input type="text" id="password" name="password" placeholder="Enter password..">
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <input type="submit" value="Log in">
+                  </div>
+              </form>
             </div>
-            
         </div>
         <div class="footer">
             <p>Copyright &copy 2019 by <a href="">Matt</a></p>
         </div>
-    </div>
+    </div>    
 </body>
 </html>
