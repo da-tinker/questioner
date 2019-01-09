@@ -1,21 +1,11 @@
-Title: [Persona name] should (not) be able to [overarching
-action]
+**What does this PR do?**
+[Describe PR purpose]
 
-_Business/User Value:_ As [persona] I want to [action by user]
-so that [value or need met]
+**Description of Task to be completed:**
+[Enter description]
 
-_Acceptance Criteria_
-GIVEN [necessary context and preconditions for story]
-WHEN [action]
-THEN [reaction]
+**How should this be manually tested?**
 
-**DEV NOTES**
-[Relevant technical notes that developers may ask you to add to
-the story during weekly prep meeting (pre-IPM or IPM);
-sometimes they may add these themselves or add them as tasks]
 
-**DESIGN Notes**
-[prototype / design link inserted here; linking to a folder of
-a feature is good so designers can continue updating designs
-without anyone having to re-update the links to each design in
-the stories]
+**Associated Pivotal Tracker story:**
+#
