@@ -14,4 +14,4 @@ Optional Features
 2. Admin can add tags to a meetup record. 
 3. User can reset password. 
  
-  
+  [![Build Status](https://travis-ci.org/da-tinker/questioner.svg?branch=develop)](https://travis-ci.org/da-tinker/questioner)
