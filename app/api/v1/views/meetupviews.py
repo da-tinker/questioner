@@ -12,7 +12,7 @@ def create_meetup():
     # get the request data then
     # save as json object
     # then return success message
-    data = request.json
+    data = request.get_json()
     
     if data:
         location = data.get('location')
@@ -35,4 +35,4 @@ def save(meetup):
     return jsonify({
         "status": 201,
         "data": [meetup],
-    })
+    }), 202

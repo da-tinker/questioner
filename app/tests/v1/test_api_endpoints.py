@@ -22,7 +22,7 @@ class TestMeetupsEndpoint(unittest.TestCase):
                                                             "happeningOn": "17/01/2019",
                                                             "Tags": [],
                                                         })
-        self.assertEqual(res.status_code, 201)
+        self.assertEqual(res.status_code, 202)
         self.assertIn('Q1 Meetup', str(res.data))
 
     def tearDown(self):
