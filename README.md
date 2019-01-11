@@ -16,4 +16,4 @@ Optional Features
  
   [![Build Status](https://travis-ci.org/da-tinker/questioner.svg?branch=develop)](https://travis-ci.org/da-tinker/questioner)
 
-[![Coverage Status](https://coveralls.io/repos/github/da-tinker/questioner/badge.svg?branch=develop)](https://coveralls.io/github/da-tinker>/questioner?branch=develop)
+[![Coverage Status](https://coveralls.io/repos/github/da-tinker/questioner/badge.svg?branch=develop)](https://coveralls.io/github/da-tinker/questioner?branch=develop)
