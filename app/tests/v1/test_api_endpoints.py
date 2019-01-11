@@ -23,8 +23,7 @@ class TestMeetupsEndpoint(unittest.TestCase):
                                                             "Tags": [],
                                                         })
         self.assertEqual(res.status_code, 202)
-        self.assertIn('Q1 Meetup', str(res.data))
-
+    
     def tearDown(self):
         """teardown all initialized variables."""
 
