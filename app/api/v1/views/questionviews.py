@@ -55,3 +55,21 @@ def upvote_question(question_id):
             "votes": ''
         }]
     }), 202
+
+@question_view_blueprint.route('/questions/<question_id>/downvote', methods=['PATCH'])
+def downvote_question(question_id):
+    # the plan
+    # get votes from question
+    # decrease by 1
+    # submit to storage
+    # if storage ok, return
+    # else return error and notification to retry later
+    return jsonify({
+        "status": 201,
+        "data": [{
+            "meetup": '',
+            "title": '',
+            "body": '',
+            "votes": ''
+        }]
+    }), 202
