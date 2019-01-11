@@ -8,7 +8,7 @@ before_install:
     - pip install coveralls
 
 script:
-  - py.test
+  - py.test --cov
 
 after_success:
     - coveralls
