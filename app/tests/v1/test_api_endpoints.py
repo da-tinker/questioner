@@ -54,6 +54,16 @@ class TestMeetupsEndpoint(unittest.TestCase):
                                                                 })       
 
         self.assertEqual(res.status_code, 202)
+
+    def test_endpoint_downvote_question_is_reachable(self):
+        """Test API can downvote a question (PATCH request)"""
+        res = self.client.patch('api/v1/questions/1/downvote', data = {    "meetup": "Q1 Meetup",
+                                                                        "title": 'Test title',
+                                                                        "body": "Swali langu ni je",
+                                                                        "votes": "0"
+                                                                })       
+
+        self.assertEqual(res.status_code, 202)
     
     def tearDown(self):
         """teardown all initialized variables."""
