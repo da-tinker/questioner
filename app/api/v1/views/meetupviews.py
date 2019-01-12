@@ -5,7 +5,6 @@ from app.api.v1.models import Meetup
 
 meetup_view_blueprint = Blueprint('meets', '__name__')
 
-
 @meetup_view_blueprint.route('/meetups', methods=['POST'])
 def create_meetup():
     # the plan:
@@ -36,3 +35,21 @@ def save(meetup):
         "status": 201,
         "data": [meetup],
     }), 202
+
+
+@meetup_view_blueprint.route('/meetups/<meetup_id>', methods=['GET'])
+def get_meetup(meetup_id):
+    # the plan
+    # pass call to storage to
+    # return a meetup of specified id
+
+    return jsonify({
+        "status": 200,
+        "data": [{
+            "id": "",
+            "topic": "",
+            "location": "",
+            "happeningOn": "",
+            "tags":[]
+        }]
+    }), 203
