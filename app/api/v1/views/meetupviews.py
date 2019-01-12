@@ -36,6 +36,9 @@ def save(meetup):
         "data": [meetup],
     }), 202
 
+def validate_request_data(req_data):
+    pass
+
 
 @meetup_view_blueprint.route('/meetups/<meetup_id>', methods=['GET'])
 def get_meetup(meetup_id):
