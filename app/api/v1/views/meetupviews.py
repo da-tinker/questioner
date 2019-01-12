@@ -53,3 +53,21 @@ def get_meetup(meetup_id):
             "tags":[]
         }]
     }), 203
+
+@meetup_view_blueprint.route('/meetups/upcoming/', methods=['GET'])
+def get_all_upcoming_meetups():
+    # the plan
+    # pass call to storage to
+    # return all meetups
+
+    return jsonify({
+        "status": 200,
+        "data": [{
+            "id": "",
+            "topic": "",
+            "location": "",
+            "happeningOn": "",
+            "tags":[]
+        }]
+    }), 203
+    
