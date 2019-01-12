@@ -16,6 +16,9 @@ class TestQuestionerStorageFunctions(unittest.TestCase):
         """Test that storage object is instantiated"""
         self.assertIsInstance(self.storage, QuestionerStorage, 'Storage Not Instantiated')
 
+    def test_storage_has_property_meetups_list(self):
+        """Test that storage object has meetups list property"""
+        self.assertTrue(self.storage.message_list == [])
 
     def tearDown(self):
         """teardown all initialized variables."""
