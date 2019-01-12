@@ -70,6 +70,12 @@ class TestMeetupsEndpoint(unittest.TestCase):
         res = self.client.get('api/v1/meetups/1')       
 
         self.assertEqual(res.status_code, 203)
+
+    def test_endpoint_get_all_meetups_is_reachable(self):
+        """Test API can fetch all upcoming meetup records (GET request)"""
+        res = self.client.get('api/v1/meetups/upcoming/')       
+
+        self.assertEqual(res.status_code, 203)
     
     def tearDown(self):
         """teardown all initialized variables."""
