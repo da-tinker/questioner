@@ -28,6 +28,7 @@ Attendees can cast votes on questions and this enables the meetup organizer(s) t
 3. User can reset password. 
 
 # Getting started
+This guide addresses the REST API server component of Questioner
 
 ## Installation
 1. Clone the repository
@@ -62,6 +63,7 @@ $ pip install -r requirements.txt
    ```bash
 $ flask run
    ```
+The api server is now running locally and can be reached on: `http://localhost:5000/`
 
 ## Testing
 1. Source code unit tests
@@ -73,8 +75,8 @@ $ flask run
    ```bash
    $ pytest tests/
    ```
-2. API Endpoints functionality
-   Postman
+2. API Endpoints functionality  
+   You can use [Postman](https://www.getpostman.com/) to test the endpoints
 
 ## Endpoints
 | Request Method       | EndPoint       | Functionality |
