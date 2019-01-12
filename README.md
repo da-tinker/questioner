@@ -1,13 +1,7 @@
-<div align='center'>
+# Questioner
+<span> Where Questions Drive Agenda </span>
 
-    # Questioner
-    <span> Where Questions Drive Agenda <span>
-    [![Build Status](https://travis-ci.org/da-tinker/questioner.svg?branch=develop)](https://travis-ci.org/da-tinker/questioner)
-    [![Coverage Status](https://coveralls.io/repos/github/da-tinker/questioner/badge.svg?branch=develop)](https://coveralls.io/github/da-tinker/questioner?branch=develop)
-    [![Maintainability](https://api.codeclimate.com/v1/badges/2cada0d526a4ef023891/maintainability)](https://codeclimate.com/github/da-tinker/questioner/maintainability)
-    [![Test Coverage](https://api.codeclimate.com/v1/badges/2cada0d526a4ef023891/test_coverage)](https://codeclimate.com/github/da-tinker/questioner/test_coverage)
-
-</div>
+[![Build Status](https://travis-ci.org/da-tinker/questioner.svg?branch=develop)](https://travis-ci.org/da-tinker/questioner) [![Coverage Status](https://coveralls.io/repos/github/da-tinker/questioner/badge.svg?branch=develop)](https://coveralls.io/github/da-tinker/questioner?branch=develop) [![Maintainability](https://api.codeclimate.com/v1/badges/2cada0d526a4ef023891/maintainability)](https://codeclimate.com/github/da-tinker/questioner/maintainability)
 
 # Project Overview
 Questioner is a platform to crowd-source questions for a meetup i.e. attendees of a meetup get to post questions that they would like discussed during the meetup.
@@ -32,51 +26,49 @@ This guide addresses the REST API server component of Questioner
 
 ## Installation
 1. Clone the repository
-   
-   ```bash
+```bash
 $ git clone https://github.com/da-tinker/questioner.git
-   ```
+```
 
 2. Navigate to project folder
-   
-   ```bash
+
+```bash
     $ cd questioner
-   ```
+```
 
 3. Ensure you're on the develop branch
 ```bash
 $ git checkout develop
 ```
 4. Activate the virtual environment
-
-   ```bash
+```bash
 $ source env/bin/activate
-   ```
+```
 
 5. Install requirements
-
-   ```bash
+```bash
 $ pip install -r requirements.txt
-   ```
+```
 
 ## Run the app
-   ```bash
+```bash
 $ flask run
-   ```
+```
 The api server is now running locally and can be reached on: `http://localhost:5000/`
 
 ## Testing
 1. Source code unit tests
-   Navigate to app directory
+ + Navigate to app directory
    ```bash
     $ cd app
    ```
-   Execute pytest against the tests directory
+ + Execute pytest against the tests directory
    ```bash
    $ pytest tests/
    ```
+
 2. API Endpoints functionality  
-   You can use [Postman](https://www.getpostman.com/) to test the endpoints
+    You can use [Postman](https://www.getpostman.com/) to test the endpoints
 
 ## Endpoints
 | Request Method       | EndPoint       | Functionality |
@@ -85,7 +77,6 @@ The api server is now running locally and can be reached on: `http://localhost:5
 | GET  | `/api/v1/meetups/<meetup_id>`  | Fetch a specific meetup record  |
 | GET  | `/api/v1/meetups/upcoming/`   | Fetch all upcoming meetup records   |
 | POST  | `/api/v1/meetups/<meetup_id>/rsvps`   | RSVP to meetup   |
-|
 | POST  | `/api/v1/questions` | Create a question for a specific meetup.   |
 | PATCH | `/api/v1/questions/<question_id>/upvote` | Add vote count for question by one |
 | PATCH | `/api/v1/questions/<question_id>/downvote` | Decrease vote count for question by one  |
