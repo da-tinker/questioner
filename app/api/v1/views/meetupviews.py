@@ -7,26 +7,18 @@ meetup_view_blueprint = Blueprint('meets', '__name__')
 
 @meetup_view_blueprint.route('/meetups', methods=['POST'])
 def create_meetup():
-    # the plan:
-    # get the request data then
-    # save as json object
-    # then return success message
-    data = request.get_json()
+    if request.content_type == 'application/x-www-form-urlencoded':
+        raw_data = request.args
+        data = raw_data.to_dict()
     
-    if data:
-        location = data.get('location')
-        images = data.get('images')
-        topic = data.get('topic')
-        happeningOn = data.get('happening on')
-        tags = data.get('tags')
+    res_valid_data = validate_request_data(data)
 
-        meetup = jsonify(location, images, topic, happeningOn, tags)
+    if data == res_valid_data:
+        # send to storage
+        # response = save(meetup)
+        pass
     else:
-        meetup = {"error": "no data"}
-
-    response = save(meetup)
-
-    return response
+        return jsonify(res_valid_data), 202
 
 def save(meetup):
     # do some processing
@@ -37,8 +29,30 @@ def save(meetup):
     }), 202
 
 def validate_request_data(req_data):
-    pass
+    # data = {
+    #             "topic": "Q1 Meetup", required
+    #             "location": "Nairobi", required
+    #             "happeningOn": "17/01/2019", required
+    #             "images": [],
+    #             "Tags": [],
+    #             "created_by": "User" // required
+    #         }
+    
+    req_fields = ['topic', 'location', 'happeningOn', 'created_by']
+    missing_fields = []
 
+    for field in req_fields:
+        if field not in req_data:
+            missing_fields.append(field)
+
+    if len(missing_fields) > 0:
+        response = {
+            "status" : '400',
+            "error": 'Required fields missing: ' + ',  '.join(missing_fields)
+        }
+        return response
+    else:
+        return req_data
 
 @meetup_view_blueprint.route('/meetups/<meetup_id>', methods=['GET'])
 def get_meetup(meetup_id):

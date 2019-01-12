@@ -17,16 +17,16 @@ class TestMeetupsEndpointFunctions(unittest.TestCase):
     def test_validate_meetup_fields(self):
         """Test that required fields are present"""
         req_data =  {    "topic": "Q1 Meetup",
-                        "location": "Nairobi",
                         "happeningOn": "17/01/2019",
+                        "location" : "Nairobi",
                         "images": [],
                         "Tags": [],
                         "created_by" : ""
                     }
-                    
+
         output = self.meetup_validate_request_data(req_data)
 
-        self.assertIn("id", output)
+        self.assertIn("location", output)
 
 
     def tearDown(self):
