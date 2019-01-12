@@ -23,8 +23,8 @@ class TestMeetupsEndpointFunctions(unittest.TestCase):
                     }
 
         output = self.meetup_validate_request_data(req_data)
-
-        self.assertIn("location", output)
+        if not output['error']:
+            self.assertIn("location", output)
 
     def test_validate_meetup_required_fields_not_empty(self):
         """Test that required fields are not empty"""

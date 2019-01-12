@@ -19,7 +19,7 @@ def create_meetup():
     if data == res_valid_data:
         # send to storage
         # response = save(meetup)
-        pass
+        return jsonify(res_valid_data), 202
     else:
         return jsonify(res_valid_data), 202
 
@@ -49,7 +49,7 @@ def validate_request_data(req_data):
         if field not in req_data:
             missing_fields.append(field)
         
-        elif req_data[field] == "":
+        elif req_data[field] == "" or req_data[field] == '""':
             # pdb.set_trace()
             empty_fields.append(field)
 
