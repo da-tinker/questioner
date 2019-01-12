@@ -1,3 +1,5 @@
+import pdb
+
 # Define blueprint for meetup view
 from flask import Blueprint, request, jsonify
 
@@ -7,10 +9,11 @@ meetup_view_blueprint = Blueprint('meets', '__name__')
 
 @meetup_view_blueprint.route('/meetups', methods=['POST'])
 def create_meetup():
+    # pdb.set_trace()
     if request.content_type == 'application/x-www-form-urlencoded':
         raw_data = request.args
         data = raw_data.to_dict()
-    
+
     res_valid_data = validate_request_data(data)
 
     if data == res_valid_data:
@@ -40,16 +43,29 @@ def validate_request_data(req_data):
     
     req_fields = ['topic', 'location', 'happeningOn', 'created_by']
     missing_fields = []
-
+    empty_fields = []
+    # pdb.set_trace()
     for field in req_fields:
         if field not in req_data:
             missing_fields.append(field)
+        
+        elif req_data[field] == "":
+            # pdb.set_trace()
+            empty_fields.append(field)
 
     if len(missing_fields) > 0:
         response = {
             "status" : '400',
             "error": 'Required fields missing: ' + ',  '.join(missing_fields)
         }
+        # pdb.set_trace()
+        return response
+    elif len(empty_fields) > 0:
+        response = {
+            "status": '400',
+            "error": 'Required field(s) empty: ' + ',  '.join(empty_fields)
+        }
+        # pdb.set_trace()
         return response
     else:
         return req_data
