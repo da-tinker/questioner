@@ -173,8 +173,7 @@ class TestQuestionerStorageFunctions(unittest.TestCase):
         # self.assertIs(output, list()) # Gives error: AssertionError: [] is not [] // bug??
         self.assertIsNot(output, list())
         
-    
-    def tearDown(self):
+        def tearDown(self):
         """teardown all initialized variables."""
 
 # Make the tests conveniently executable

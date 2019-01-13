@@ -50,8 +50,7 @@ def validate_request_data(req_data):
     #             "images": [],
     #             "Tags": [],
     #             "created_by": "User" // required
-    #         }
-    
+    #         }   
     req_fields = ['topic', 'location', 'happeningOn', 'created_by']
     missing_fields = []
     empty_fields = []
@@ -63,7 +62,7 @@ def validate_request_data(req_data):
         elif req_data[field] == "" or req_data[field] == '""':
             # pdb.set_trace()
             empty_fields.append(field)
-
+    
     if len(missing_fields) > 0:
         response = {
             "status" : '400',
