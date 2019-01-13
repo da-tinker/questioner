@@ -81,3 +81,7 @@ class QuestionerStorage():
         item_list.append(item_to_add)
 
         return item_list
+    
+    def get_all_records(self, list_name, criteria=''):
+        if list_name == 'meetups':
+            return self.meetup_list
