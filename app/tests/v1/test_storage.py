@@ -169,8 +169,10 @@ class TestQuestionerStorageFunctions(unittest.TestCase):
         """Test that a list of item records is returned"""
 
         output = self.storage.get_all_records('meetups')
-        pdb.set_trace()
+        # pdb.set_trace()
+        # self.assertIs(output, list()) # Gives error: AssertionError: [] is not [] // bug??
         self.assertIsNot(output, list())
+        
     
     def tearDown(self):
         """teardown all initialized variables."""
