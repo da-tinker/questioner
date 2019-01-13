@@ -43,7 +43,6 @@ class QuestionerStorage():
                     self.meetup_u_n_id = self.generate_id(self.meetup_list)
                     self.save_item('meetups', item)
 
-
     def generate_id(self, items_list):
         item_id = 0
 
@@ -85,3 +84,23 @@ class QuestionerStorage():
     def get_all_records(self, list_name, criteria=''):
         if list_name == 'meetups':
             return list(self.meetup_list)
+    
+    def get_record(self, list_name, item_id):
+        found_rec = []
+        if list_name == 'meetups':
+
+            for item_record in self.meetup_list:
+                if item_record['id'] == item_id:
+                    found_rec.append(item_record)
+
+            if len(found_rec) == 1:
+                return found_rec[0]
+            elif len(found_rec) == 0:
+                message = {
+                    "error": "No record found for id {}".format(item_id)
+                }
+            else:
+                message = {
+                    "error" : "Multiple records!"
+                }
+            return message

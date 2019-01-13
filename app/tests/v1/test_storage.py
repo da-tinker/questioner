@@ -172,9 +172,51 @@ class TestQuestionerStorageFunctions(unittest.TestCase):
         # pdb.set_trace()
         # self.assertIs(output, list()) # Gives error: AssertionError: [] is not [] // bug??
         self.assertIsNot(output, list())
+    
+    def test_storage_method_get_record_returns_record_of_type_dict(self):
+        """Test that a record(dict) is returned"""
+
+        output = self.storage.get_record('meetups', 0)
         
-        def tearDown(self):
-            """teardown all initialized variables."""
+        assert type(output) == dict
+    
+    def test_storage_method_get_record_returns_record_of_specified_id(self):
+        """Test that a record(dict) of specified id is returned"""
+
+        input_1 = { "topic": "Q2 Meetup",
+                    "location": "Nairobi",
+                    "happeningOn": "17/01/2019",
+                    "images": [],
+                    "Tags": []
+                }
+        
+        input_2 = {
+                    "topic": "Q1 Meetup",
+                    "location": "Nairobi",
+                    "happeningOn": "17/01/2019",
+                    "images": [],
+                    "Tags": []
+                }
+
+        output_1 = self.storage.save_item('meetups', input_1)
+        output_2 = self.storage.save_item('meetups', input_2)
+
+        
+        output = self.storage.get_record('meetups', output_1['id'])
+        output_ = self.storage.get_record('meetups', output_2['id'])
+        
+        self.assertEqual(output_1['id'], output['id'])
+        self.assertEqual(output_2['id'], output_['id'])
+
+    def test_storage_method_get_record_returns_error_if_record_not_found(self):
+        """Test that a record(dict) is returned"""
+
+        output = self.storage.get_record('meetups', 0)
+
+        self.assertIn('error', output)
+
+    def tearDown(self):
+        """teardown all initialized variables."""
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
