@@ -1,9 +1,12 @@
-import pdb
+# import pdb
 
 # Define blueprint for meetup view
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, make_response
 
 from app.api.v1.models import Meetup
+from app.api.v1.utils import QuestionerStorage
+
+db = QuestionerStorage()
 
 meetup_view_blueprint = Blueprint('meets', '__name__')
 
@@ -18,18 +21,26 @@ def create_meetup():
 
     if data == res_valid_data:
         # send to storage
-        # response = save(meetup)
-        return jsonify(res_valid_data), 202
+        response = save(res_valid_data)
+        return make_response(jsonify(response), 202)
     else:
-        return jsonify(res_valid_data), 202
+        return make_response(jsonify(res_valid_data), 202)
 
-def save(meetup):
+def save(meetup_record):
     # do some processing
+    db_response = db.save_item('meetups', meetup_record)
 
-    return jsonify({
-        "status": 201,
-        "data": [meetup],
-    }), 202
+    if all(item in db_response.items() for item in meetup_record.items()):
+        return {
+            "status": 201,
+            "data": [meetup_record]
+        }
+    else:
+        return {
+            "status": 503,
+            "error": 'An error occurred while saving the record.'
+        }
+
 
 def validate_request_data(req_data):
     # data = {
