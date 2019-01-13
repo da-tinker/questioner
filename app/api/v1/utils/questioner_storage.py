@@ -84,4 +84,4 @@ class QuestionerStorage():
     
     def get_all_records(self, list_name, criteria=''):
         if list_name == 'meetups':
-            return self.meetup_list
+            return list(self.meetup_list)
