@@ -171,7 +171,7 @@ class TestQuestionerStorageFunctions(unittest.TestCase):
         output = self.storage.get_all_records('meetups')
         # pdb.set_trace()
         # self.assertIs(output, list()) # Gives error: AssertionError: [] is not [] // bug??
-        self.assertIsNot(output, list())
+        assert type(output) == list
     
     def test_storage_method_get_record_returns_record_of_type_dict(self):
         """Test that a record(dict) is returned"""
