@@ -1,36 +1,93 @@
+import pdb
+
 # Define blueprint for rsvp view
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, make_response
 
 from app.api.v1.models import rsvp
+from app.api.v1.utils import QuestionerStorage
+
+db = QuestionerStorage()
 
 rsvp_view_blueprint = Blueprint('rsvp_bp', '__name__')
 
 
 @rsvp_view_blueprint.route('/meetups/<meetup_id>/rsvps', methods=['POST'])
 def create_rsvp(meetup_id):
-    # the plan:
-    # get the request data then
-    # save as json object
-    # then return success message
-    data = request.get_json()
-    
-    if data:
-        # extract rsvp info
-        pass
+    # pdb.set_trace()
+    # if is_meetup_id_invalid(meetup_id):
+    #     response = {
+    #         "status" : 404,
+    #         "error": "Meetup with id {} not found".format(meetup_id)
+    #     }
+    #     return make_response(jsonify(response), 202)
+
+    if request.content_type == 'application/x-www-form-urlencoded':
+        raw_data = request.args
+        data = raw_data.to_dict()
+
+    res_valid_data = rsvp_validate_request_data(data)
+
+    if data == res_valid_data:
+        # send to storage
+        response = save(res_valid_data)
+        return make_response(jsonify(response), 202)
     else:
-        rsvp = {"error": "no data"}
+        return make_response(jsonify(res_valid_data), 202)
 
-    # save rsvp data and return
-    response = save(rsvp)
-
-
-    # To-Do: check that response is of correct structure
-    return response
-
-def save(rsvp):
+def save(rsvp_record):
     # do some processing
-    
-    return jsonify({
-        "status": 201,
-        "data": [rsvp],
-    }), 202
+    db_response = db.save_item('rsvps', rsvp_record)
+
+    if all(item in db_response.items() for item in rsvp_record.items()):
+        return {
+            "status": 201,
+            "data": [rsvp_record]
+        }
+    else:
+        return {
+            "status": 503,
+            "error": 'An error occurred while saving the record.'
+        }
+
+def is_meetup_id_invalid(meetup_id):
+    exists = False
+    m_id = int(meetup_id)
+    exists = db.check_id_unique(m_id, db.meetup_list)
+    # pdb.set_trace()
+    return exists
+
+
+def rsvp_validate_request_data(req_data):
+    # data = {
+    #             "meetup": 1, required
+    #             "user": 2, required
+    #             "response": "yes | no | maybe", required
+    #         }
+    req_fields = ['meetup', 'user', 'response']
+    missing_fields = []
+    empty_fields = []
+    # pdb.set_trace()
+    for field in req_fields:
+        if field not in req_data:
+            missing_fields.append(field)
+
+        elif req_data[field] == "" or req_data[field] == '""':
+            # pdb.set_trace()
+            empty_fields.append(field)
+
+    if len(missing_fields) > 0:
+        response = {
+            "status": '400',
+            "error": 'Required fields missing: ' + ',  '.join(missing_fields)
+        }
+        # pdb.set_trace()
+        return response
+    elif len(empty_fields) > 0:
+        response = {
+            "status": '400',
+            "error": 'Required field(s) empty: ' + ',  '.join(empty_fields)
+        }
+        # pdb.set_trace()
+        return response
+    else:
+        return req_data
