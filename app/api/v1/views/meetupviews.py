@@ -100,18 +100,11 @@ def get_meetup(meetup_id):
 
 @meetup_view_blueprint.route('/meetups/upcoming/', methods=['GET'])
 def get_all_upcoming_meetups():
-    # the plan
-    # pass call to storage to
-    # return all meetups
+    
+    meetups = db.get_all_records('meetups')
 
     return jsonify({
         "status": 200,
-        "data": [{
-            "id": "",
-            "topic": "",
-            "location": "",
-            "happeningOn": "",
-            "tags":[]
-        }]
+        "data": meetups
     }), 203
     
