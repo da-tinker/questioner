@@ -174,7 +174,7 @@ class TestQuestionerStorageFunctions(unittest.TestCase):
         self.assertIsNot(output, list())
         
         def tearDown(self):
-        """teardown all initialized variables."""
+            """teardown all initialized variables."""
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
