@@ -82,19 +82,10 @@ def validate_request_data(req_data):
 
 @meetup_view_blueprint.route('/meetups/<meetup_id>', methods=['GET'])
 def get_meetup(meetup_id):
-    # the plan
-    # pass call to storage to
-    # return a meetup of specified id
-
+    meetup_record = db.get_record('meetups', int(meetup_id))
     return jsonify({
         "status": 200,
-        "data": [{
-            "id": "",
-            "topic": "",
-            "location": "",
-            "happeningOn": "",
-            "tags":[]
-        }]
+        "data": [meetup_record]
     }), 203
 
 @meetup_view_blueprint.route('/meetups/upcoming/', methods=['GET'])
