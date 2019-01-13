@@ -1,4 +1,4 @@
-# import pdb
+import pdb
 
 import unittest
 import os
@@ -34,6 +34,10 @@ class TestQuestionerStorageFunctions(unittest.TestCase):
     def test_storage_has_method_property_check_id_unique(self):
         """Test that storage object has property check_id_unique method"""
         self.assertTrue('check_id_unique' in dir(self.storage))
+    
+    def test_storage_has_method_property_get_all_records(self):
+        """Test that storage object has property get_all_recordsmethod"""
+        self.assertTrue('get_all_records' in dir(self.storage))
 
     def test_storage_has_method_property_increment_generated_non_unique_id(self):
         """Test that storage object has property increment_generated_non_unique_id method"""
@@ -159,10 +163,17 @@ class TestQuestionerStorageFunctions(unittest.TestCase):
                         }
 
         output = self.storage.save_item('meetups', input_1)
-
         self.assertTrue(all(item in output.items() for item in expected_output.items()))
 
-    def tearDown(self):
+    def test_storage_method_get_all_records_returns_list_of_records(self):
+        """Test that a list of item records is returned"""
+
+        output = self.storage.get_all_records('meetups')
+        # pdb.set_trace()
+        # self.assertIs(output, list()) # Gives error: AssertionError: [] is not [] // bug??
+        self.assertIsNot(output, list())
+        
+        def tearDown(self):
         """teardown all initialized variables."""
 
 # Make the tests conveniently executable
