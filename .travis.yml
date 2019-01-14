@@ -8,8 +8,7 @@ before_install:
     - pip install coveralls
 
 script:
-  - py.test --cov=app
-  - coverage report
+  - py.test --cov=app && coverage report
 
 after_success:
     - coveralls
