@@ -9,6 +9,7 @@ before_install:
 
 script:
   - py.test --cov=app
+  - coverage report
 
 after_success:
     - coveralls
