@@ -69,20 +69,17 @@ def question_validate_request_data(req_data):
 
 @question_view_blueprint.route('/questions/<question_id>/upvote', methods=['PATCH'])
 def upvote_question(question_id):
-    # the plan
-    # get votes from question
-    # increase by 1
-    # submit to storage
-    # if storage ok, return
-    # else return error and notification to retry later
+    # pdb.set_trace()
+    question_record = db.get_record(int(question_id), db.question_list)
+    votes = int(question_record['votes'])
+    votes += 1
+    question_record['votes'] = votes
+
+    response = db.save_item('questions', question_record, 'update')
+
     return jsonify({
         "status": 201,
-        "data": [{
-            "meetup": '',
-            "title": '',
-            "body": '',
-            "votes": ''
-        }]
+        "data": [response]
     }), 202
 
 @question_view_blueprint.route('/questions/<question_id>/downvote', methods=['PATCH'])
