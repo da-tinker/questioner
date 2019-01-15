@@ -1,10 +1,10 @@
-# import pdb
+import pdb
 
 # Define blueprint for meetup view
 from flask import Blueprint, request, jsonify, make_response
 
 from app.api.v1.models import Meetup
-from app.api.v1.utils import QuestionerStorage
+from app.api.v1.utils import QuestionerStorage, validate_request_data
 
 db = QuestionerStorage()
 
@@ -17,7 +17,7 @@ def create_meetup():
         raw_data = request.args
         data = raw_data.to_dict()
 
-    res_valid_data = validate_request_data(data)
+    res_valid_data = meetup_validate_request_data(data)
 
     if data == res_valid_data:
         # send to storage
@@ -42,43 +42,35 @@ def save(meetup_record):
         }
 
 
-def validate_request_data(req_data):
+def meetup_validate_request_data(req_data):
     # data = {
     #             "topic": "Q1 Meetup", required
     #             "location": "Nairobi", required
     #             "happeningOn": "17/01/2019", required
     #             "images": [],
     #             "Tags": [],
-    #             "created_by": "User" // required
+    #             "created_by": "User" // not mentioned in the spec doc but is logically needed
     #         }   
-    req_fields = ['topic', 'location', 'happeningOn', 'created_by']
-    missing_fields = []
-    empty_fields = []
-    # pdb.set_trace()
+    req_fields = ['topic', 'location', 'happeningOn']
+    other_fields = ['images', 'Tags']
+
+    dict_req_fields = {}
+    dict_other_fields = {}
+
+    sanitized_data = []
+
     for field in req_fields:
-        if field not in req_data:
-            missing_fields.append(field)
-        
-        elif req_data[field] == "" or req_data[field] == '""':
-            # pdb.set_trace()
-            empty_fields.append(field)
-    
-    if len(missing_fields) > 0:
-        response = {
-            "status" : '400',
-            "error": 'Required fields missing: ' + ',  '.join(missing_fields)
-        }
-        # pdb.set_trace()
-        return response
-    elif len(empty_fields) > 0:
-        response = {
-            "status": '400',
-            "error": 'Required field(s) empty: ' + ',  '.join(empty_fields)
-        }
-        # pdb.set_trace()
-        return response
-    else:
-        return req_data
+        if field in req_data:
+            dict_req_fields.update({field: req_data[field]}) 
+    sanitized_data.append(dict_req_fields)
+
+
+    for field in other_fields:
+        if field in req_data:
+            dict_other_fields.update({field: req_data[field]})
+    sanitized_data.append(dict_other_fields)
+            
+    return validate_request_data(sanitized_data)
 
 @meetup_view_blueprint.route('/meetups/<meetup_id>', methods=['GET'])
 def get_meetup(meetup_id):
