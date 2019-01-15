@@ -14,17 +14,25 @@ rsvp_view_blueprint = Blueprint('rsvp_bp', '__name__')
 @rsvp_view_blueprint.route('/meetups/<meetup_id>/rsvps', methods=['POST'])
 def create_rsvp(meetup_id):
     # pdb.set_trace()
-    # if is_meetup_id_invalid(meetup_id):
-    #     response = {
-    #         "status" : 404,
-    #         "error": "Meetup with id {} not found".format(meetup_id)
-    #     }
-    #     return make_response(jsonify(response), 202)
+    if is_meetup_id_invalid(meetup_id):
+        response = {
+            "status" : 404,
+            "error": "Meetup with id {} not found".format(meetup_id)
+        }
+        return make_response(jsonify(response), 202)
 
     raw_data = request.args
     data = raw_data.to_dict()
 
     res_valid_data = rsvp_validate_request_data(data)
+
+    # Ad-hoc validation for response
+    if data['response'] not in ['yes', 'no', 'maybe']:
+        response = {
+            'status': '405',
+            'error' : 'Invalid response. Must be one of: yes | no | maybe'
+        }
+        return make_response(jsonify(response), 202)
 
     if data == res_valid_data:
         # send to storage
