@@ -8,6 +8,7 @@ class QuestionerStorage():
     def __init__(self):
         self.meetup_list = []
         self.rsvp_list = []
+        self.question_list = []
         
         self.record_u_n_id = 0
 
@@ -17,6 +18,9 @@ class QuestionerStorage():
                 list_to_update = self.meetup_list
             
             if list_name == 'rsvps':
+                list_to_update = self.rsvp_list
+            
+            if list_name == 'questions':
                 list_to_update = self.rsvp_list
             
             return self.add_new_item_record(list_name, item, list_to_update)
