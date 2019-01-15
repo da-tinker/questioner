@@ -1,10 +1,10 @@
-import pdb
+# import pdb
 
 # Define blueprint for rsvp view
 from flask import Blueprint, request, jsonify, make_response
 
 from app.api.v1.models import rsvp
-from app.api.v1.utils import QuestionerStorage
+from app.api.v1.utils import QuestionerStorage, validate_request_data
 
 db = QuestionerStorage()
 
@@ -64,30 +64,21 @@ def rsvp_validate_request_data(req_data):
     #             "response": "yes | no | maybe", required
     #         }
     req_fields = ['meetup', 'user', 'response']
-    missing_fields = []
-    empty_fields = []
-    # pdb.set_trace()
+    other_fields = []
+
+    dict_req_fields = {}
+    dict_other_fields = {}
+
+    sanitized_data = []
+
     for field in req_fields:
-        if field not in req_data:
-            missing_fields.append(field)
+        if field in req_data:
+            dict_req_fields.update({field: req_data[field]})
+    sanitized_data.append(dict_req_fields)
 
-        elif req_data[field] == "" or req_data[field] == '""':
-            # pdb.set_trace()
-            empty_fields.append(field)
+    for field in other_fields:
+        if field in req_data:
+            dict_other_fields.update({field: req_data[field]})
+    sanitized_data.append(dict_other_fields)
 
-    if len(missing_fields) > 0:
-        response = {
-            "status": '400',
-            "error": 'Required fields missing: ' + ',  '.join(missing_fields)
-        }
-        # pdb.set_trace()
-        return response
-    elif len(empty_fields) > 0:
-        response = {
-            "status": '400',
-            "error": 'Required field(s) empty: ' + ',  '.join(empty_fields)
-        }
-        # pdb.set_trace()
-        return response
-    else:
-        return req_data
+    return validate_request_data(sanitized_data)
