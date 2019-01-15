@@ -7,75 +7,19 @@ class QuestionerStorage():
     
     def __init__(self):
         self.meetup_list = []
-        self.meetup_u_n_id = 0
-
         self.rsvp_list = []
-        self.rsvp_u_n_id = 0
+        
+        self.record_u_n_id = 0
 
-    def save_item(self, list_name, item):
-        if list_name == 'meetups':
-            # pdb.set_trace()
-            if self.meetup_u_n_id > 0:
-                if self.check_id_unique(self.meetup_u_n_id, self.meetup_list):
-                
-                    created_on = datetime.datetime.now().timestamp()
-                    new_item_record = self.set_id_and_creation_time(
-                        self.meetup_u_n_id, created_on, item
-                    )
-                    self.add_to_list(new_item_record, self.meetup_list)
-                    self.meetup_u_n_id = 0
-                    # pdb.set_trace()
-                    return new_item_record
-                
-                else:
-                    self.save_item('meetups', item)
+    def save_item(self, list_name, item, action_type):
+        if action_type == 'add_new':
+            if list_name == 'meetups':
+                list_to_update = self.meetup_list
             
-            else:
-                new_id = self.generate_id(self.meetup_list)
-                if self.check_id_unique(new_id, self.meetup_list):
-
-                    created_on = datetime.datetime.now().timestamp()
-                    new_item_record = self.set_id_and_creation_time(
-                        new_id, created_on, item
-                    )
-                    self.add_to_list(new_item_record, self.meetup_list)
-                    self.meetup_u_n_id = 0
-                    # pdb.set_trace()
-                    return new_item_record
-                else:
-                    self.meetup_u_n_id = self.generate_id(self.meetup_list)
-                    self.save_item('meetups', item)
-        elif list_name == 'rsvps':
-            if self.rsvp_u_n_id > 0:
-                if self.check_id_unique(self.rsvp_u_n_id, self.rsvp_list):
-
-                    created_on = datetime.datetime.now().timestamp()
-                    new_item_record = self.set_id_and_creation_time(
-                        self.rsvp_u_n_id, created_on, item
-                    )
-                    self.add_to_list(new_item_record, self.rsvp_list)
-                    self.rsvp_u_n_id = 0
-                    # pdb.set_trace()
-                    return new_item_record
-
-                else:
-                    self.save_item('rsvps', item)
-
-            else:
-                new_id = self.generate_id(self.rsvp_list)
-                if self.check_id_unique(new_id, self.rsvp_list):
-
-                    created_on = datetime.datetime.now().timestamp()
-                    new_item_record = self.set_id_and_creation_time(
-                        new_id, created_on, item
-                    )
-                    self.add_to_list(new_item_record, self.rsvp_list)
-                    self.rsvp_u_n_id = 0
-                    # pdb.set_trace()
-                    return new_item_record
-                else:
-                    self.rsvp_u_n_id = self.generate_id(self.rsvp_list)
-                    self.save_item('rsvps', item)
+            if list_name == 'rsvps':
+                list_to_update = self.rsvp_list
+            
+            return self.add_new_item_record(list_name, item, list_to_update)
 
 
     def generate_id(self, items_list):
@@ -139,3 +83,35 @@ class QuestionerStorage():
                     "error" : "Multiple records!"
                 }
             return message
+
+    def add_new_item_record(self, list_name, item, current_list):
+        if self.record_u_n_id > 0:
+                if self.check_id_unique(self.record_u_n_id, current_list):
+
+                    created_on = datetime.datetime.now().timestamp()
+                    new_item_record = self.set_id_and_creation_time(
+                        self.record_u_n_id, created_on, item
+                    )
+                    self.add_to_list(new_item_record, current_list)
+                    self.record_u_n_id = 0
+                    # pdb.set_trace()
+                    return new_item_record
+
+                else:
+                    self.add_new_item_record(list_name, item, current_list)
+
+        else:
+            new_id = self.generate_id(current_list)
+            if self.check_id_unique(new_id, current_list):
+
+                created_on = datetime.datetime.now().timestamp()
+                new_item_record = self.set_id_and_creation_time(
+                    new_id, created_on, item
+                )
+                self.add_to_list(new_item_record, current_list)
+                self.record_u_n_id = 0
+                # pdb.set_trace()
+                return new_item_record
+            else:
+                self.record_u_n_id = self.generate_id(current_list)
+                self.add_new_item_record(list_name, item, current_list)

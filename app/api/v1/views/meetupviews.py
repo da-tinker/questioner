@@ -28,7 +28,7 @@ def create_meetup():
 
 def save(meetup_record):
     # do some processing
-    db_response = db.save_item('meetups', meetup_record)
+    db_response = db.save_item('meetups', meetup_record, 'add_new')
 
     if all(item in db_response.items() for item in meetup_record.items()):
         return {

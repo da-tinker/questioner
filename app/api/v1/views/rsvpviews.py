@@ -36,7 +36,7 @@ def create_rsvp(meetup_id):
 
 def save(rsvp_record):
     # do some processing
-    db_response = db.save_item('rsvps', rsvp_record)
+    db_response = db.save_item('rsvps', rsvp_record, 'add_new')
 
     if all(item in db_response.items() for item in rsvp_record.items()):
         return {
