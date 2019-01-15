@@ -19,9 +19,17 @@ class TestQuestionerStorageFunctions(unittest.TestCase):
         """Test that storage object is instantiated"""
         self.assertIsInstance(self.storage, QuestionerStorage, 'Storage Not Instantiated')
 
-    def test_storage_has_property_meetups_list(self):
+    def test_storage_has_property_meetup_list(self):
         """Test that storage object has meetups list property"""
         self.assertTrue(self.storage.meetup_list == [])
+    
+    def test_storage_has_property_rsvp_list(self):
+        """Test that storage object has rsvps list property"""
+        self.assertTrue(self.storage.rsvp_list == [])
+    
+    def test_storage_has_property_question_list(self):
+        """Test that storage object has rsvps list property"""
+        self.assertTrue(self.storage.question_list == [])
             
     def test_storage_has_method_property_save_item(self):
         """Test that storage object has property save_item method"""
@@ -143,6 +151,31 @@ class TestQuestionerStorageFunctions(unittest.TestCase):
         output = self.storage.add_to_list(input_1, input_2)
         self.assertEqual(expected_output, output)
         
+    def test_storage_method_add_new_item_record_returns_new_item(self):
+        """Test that newly created record is returned by add_new_item_record on successful save"""
+
+        input_1 = {   "id": 1,
+                    "topic": "Q1 Meetup",
+                    "location": "Nairobi",
+                    "happeningOn": "17/01/2019",
+                    "images": [],
+                    "Tags": [],
+                }
+
+        input_2 = []
+
+        expected_output = { "id": 1,
+                            "topic": "Q1 Meetup",
+                            "location": "Nairobi",
+                            "happeningOn": "17/01/2019",
+                            "images": [],
+                            "Tags": [],
+                        }
+
+        output = self.storage.add_new_item_record('meetups', input_1, input_2)
+
+        self.assertTrue(all(item in output.items() for item in expected_output.items()))
+    
     def test_storage_method_save_item_returns_new_item(self):
         """Test that newly created record is returned by save_item on successful save"""
 
@@ -162,7 +195,7 @@ class TestQuestionerStorageFunctions(unittest.TestCase):
                             "Tags": [],
                         }
 
-        output = self.storage.save_item('meetups', input_1)
+        output = self.storage.save_item('meetups', input_1, 'add_new')
         self.assertTrue(all(item in output.items() for item in expected_output.items()))
 
     def test_storage_method_get_all_records_returns_list_of_records(self):
@@ -198,8 +231,8 @@ class TestQuestionerStorageFunctions(unittest.TestCase):
                     "Tags": []
                 }
 
-        output_1 = self.storage.save_item('meetups', input_1)
-        output_2 = self.storage.save_item('meetups', input_2)
+        output_1 = self.storage.save_item('meetups', input_1, 'add_new')
+        output_2 = self.storage.save_item('meetups', input_2, 'add_new')
 
         
         output = self.storage.get_record('meetups', output_1['id'])

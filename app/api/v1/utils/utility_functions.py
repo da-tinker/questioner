@@ -1,4 +1,4 @@
-def validate_request_data(request_data):
+def validate_request_data(request_data, required_fields_checklist):
     # request_data = [  {
     #                       "required_field_1": "datatype", 
     #                       "required_field_1": "datatype"
@@ -11,8 +11,8 @@ def validate_request_data(request_data):
     missing_fields = []
     empty_fields = []
 
-    for field in required_fields:
-        if field not in request_data[0]:
+    for field in required_fields_checklist:
+        if field not in required_fields:
             missing_fields.append(field)
 
         elif request_data[0][field] == "" or request_data[0][field] == '""':

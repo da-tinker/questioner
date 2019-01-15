@@ -13,9 +13,8 @@ meetup_view_blueprint = Blueprint('meets', '__name__')
 @meetup_view_blueprint.route('/meetups', methods=['POST'])
 def create_meetup():
     # pdb.set_trace()
-    if request.content_type == 'application/x-www-form-urlencoded':
-        raw_data = request.args
-        data = raw_data.to_dict()
+    raw_data = request.args
+    data = raw_data.to_dict()
 
     res_valid_data = meetup_validate_request_data(data)
 
@@ -28,7 +27,7 @@ def create_meetup():
 
 def save(meetup_record):
     # do some processing
-    db_response = db.save_item('meetups', meetup_record)
+    db_response = db.save_item('meetups', meetup_record, 'add_new')
 
     if all(item in db_response.items() for item in meetup_record.items()):
         return {
@@ -70,7 +69,7 @@ def meetup_validate_request_data(req_data):
             dict_other_fields.update({field: req_data[field]})
     sanitized_data.append(dict_other_fields)
             
-    return validate_request_data(sanitized_data)
+    return validate_request_data(sanitized_data, req_fields)
 
 @meetup_view_blueprint.route('/meetups/<meetup_id>', methods=['GET'])
 def get_meetup(meetup_id):

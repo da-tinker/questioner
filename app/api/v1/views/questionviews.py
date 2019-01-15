@@ -1,42 +1,71 @@
+import pdb
 # Define blueprint for Question view
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, make_response
 
 from app.api.v1.models import Question
+from app.api.v1.utils import QuestionerStorage, validate_request_data
+
+db = QuestionerStorage()
 
 question_view_blueprint = Blueprint('question_bps', '__name__')
 
-
 @question_view_blueprint.route('/questions', methods=['POST'])
 def create_question():
-    # the plan:
-    # get the request data then
-    # save as json object
-    # then return success message
-    data = request.get_json()
+    raw_data = request.args
+    data = raw_data.to_dict()
     
-    if data:
-        location = data.get('location')
-        images = data.get('images')
-        topic = data.get('topic')
-        happeningOn = data.get('happening on')
-        tags = data.get('tags')
+    res_valid_data = question_validate_request_data(data)
 
-        Question = jsonify(location, images, topic, happeningOn, tags)
+    if data == res_valid_data:
+        # send to storage
+        response = save(res_valid_data)
+        return make_response(jsonify(response), 202)
     else:
-        Question = {"error": "no data"}
+        return make_response(jsonify(res_valid_data), 202)
 
-    response = save(Question)
-
-    return response
-
-def save(Question):
+def save(question_record):
     # do some processing
+    db_response = db.save_item('questions', question_record, 'add_new')
 
-    return jsonify({
-        "status": 201,
-        "data": [Question],
-    }), 202
+    if all(item in db_response.items() for item in question_record.items()):
+        return {
+            "status": 201,
+            "data": [question_record]
+        }
+    else:
+        return {
+            "status": 503,
+            "error": 'An error occurred while saving the record.'
+        }
 
+def question_validate_request_data(req_data):
+    # data = {
+    #             "createdBy": 0, Integer
+    #             "meetup": 0, Integer
+    #             "title": "", String
+    #             "body": "", String
+    #             "votes": 0, Integer
+    #         }
+    req_fields = ['createdBy', 'meetup', 'title']
+    other_fields = ['body', 'votes']
+
+    dict_req_fields = {}
+    dict_other_fields = {}
+
+    sanitized_data = []
+
+    for field in req_fields:
+        if field in req_data:
+            dict_req_fields.update({field: req_data[field]})    
+    
+    sanitized_data.append(dict_req_fields)
+
+    for field in other_fields:
+        if field in req_data:
+            dict_other_fields.update({field: req_data[field]})
+    sanitized_data.append(dict_other_fields)
+    # pdb.set_trace()
+    return validate_request_data(sanitized_data, req_fields)
 
 @question_view_blueprint.route('/questions/<question_id>/upvote', methods=['PATCH'])
 def upvote_question(question_id):

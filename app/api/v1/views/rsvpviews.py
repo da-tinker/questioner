@@ -21,9 +21,8 @@ def create_rsvp(meetup_id):
     #     }
     #     return make_response(jsonify(response), 202)
 
-    if request.content_type == 'application/x-www-form-urlencoded':
-        raw_data = request.args
-        data = raw_data.to_dict()
+    raw_data = request.args
+    data = raw_data.to_dict()
 
     res_valid_data = rsvp_validate_request_data(data)
 
@@ -36,7 +35,7 @@ def create_rsvp(meetup_id):
 
 def save(rsvp_record):
     # do some processing
-    db_response = db.save_item('rsvps', rsvp_record)
+    db_response = db.save_item('rsvps', rsvp_record, 'add_new')
 
     if all(item in db_response.items() for item in rsvp_record.items()):
         return {
@@ -81,4 +80,4 @@ def rsvp_validate_request_data(req_data):
             dict_other_fields.update({field: req_data[field]})
     sanitized_data.append(dict_other_fields)
 
-    return validate_request_data(sanitized_data)
+    return validate_request_data(sanitized_data, req_fields)

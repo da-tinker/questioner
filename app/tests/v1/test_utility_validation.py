@@ -25,8 +25,9 @@ class TestUtilitiesFunctions(unittest.TestCase):
                                 "tags" : []
                             }
                         ]
+        input_2 = ['topic', 'location', 'happeningOn']
 
-        output = self.validate_request_data(input_meetup)
+        output = self.validate_request_data(input_meetup, input_2)
 
         if 'error' not in output:
             self.assertIn("topic", output)
@@ -45,8 +46,9 @@ class TestUtilitiesFunctions(unittest.TestCase):
                                 "tags" : []
                             }
                         ]
+        input_2 = ['topic', 'location', 'happeningOn']
 
-        output = self.validate_request_data(input_meetup)
+        output = self.validate_request_data(input_meetup, input_2)
 
         self.assertIn('error', output)
         self.assertIn('Required field(s) empty', output['error'], 'A required field is empty')
@@ -63,14 +65,14 @@ class TestUtilitiesFunctions(unittest.TestCase):
                                 "tags" : ""
                             }
                         ]
-
+        input_2 = ['topic', 'location', 'happeningOn']
         expected_output = { "topic": "Removed empty Others",
                             "happeningOn": "17/01/2019",
                             "location": "Nairobi",
                             "images": []
                         }
 
-        output = self.validate_request_data(input_meetup)
+        output = self.validate_request_data(input_meetup, input_2)
 
         self.assertTrue(all(item in output.items() for item in expected_output.items()))       
 
