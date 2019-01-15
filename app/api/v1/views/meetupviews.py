@@ -1,4 +1,4 @@
-import pdb
+# import pdb
 
 # Define blueprint for meetup view
 from flask import Blueprint, request, jsonify, make_response
@@ -74,6 +74,9 @@ def meetup_validate_request_data(req_data):
 @meetup_view_blueprint.route('/meetups/<meetup_id>', methods=['GET'])
 def get_meetup(meetup_id):
     meetup_record = db.get_record(int(meetup_id), db.meetup_list)
+    if 'error' in meetup_record:
+        return jsonify(meetup_record, 404)
+
     return jsonify({
         "status": 200,
         "data": [meetup_record]

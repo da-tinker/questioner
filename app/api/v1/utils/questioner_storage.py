@@ -57,7 +57,7 @@ class QuestionerStorage():
     def set_id_and_creation_time(self, id_to_set, createdOn, item):
         item.update({
             'id' : id_to_set,
-            'createdOn' : createdOn
+            'createdOn': datetime.datetime.fromtimestamp(createdOn).strftime('%d-%m-%Y')
         })
         return item
     

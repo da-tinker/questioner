@@ -38,14 +38,14 @@ class TestMeetupsEndpoint(unittest.TestCase):
 
         self.assertEqual(res.status_code, 202)
 
-    def test_endpoint_make_rsvp_is_reachable(self):
-        """Test API can create a rsvp for user (POST request)"""
-        res = self.client.post('api/v1/meetups/1/rsvps', data = {   "meetup": "Q1 Meetup",
-                                                                    "user": 'Test user',
-                                                                    "response": "Yes | No | Maybe",
-                                                                })       
+    # def test_endpoint_make_rsvp_is_reachable(self):
+    #     """Test API can create a rsvp for user (POST request)"""
+    #     res = self.client.post('api/v1/meetups/1/rsvps', data = {   "meetup": "Q1 Meetup",
+    #                                                                 "user": 'Test user',
+    #                                                                 "response": "Yes | No | Maybe",
+    #                                                             })       
 
-        self.assertEqual(res.status_code, 202)
+    #     self.assertEqual(res.status_code, 202)
 
     # def test_endpoint_upvote_question_is_reachable(self):
     #     """Test API can upvote a question (PATCH request)"""
@@ -71,11 +71,11 @@ class TestMeetupsEndpoint(unittest.TestCase):
 
     #     self.assertEqual(res.status_code, 202)
 
-    def test_endpoint_fetch_a_meetup_is_reachable(self):
-        """Test API can get a specific meetup record (GET request)"""
-        res = self.client.get('api/v1/meetups/1')       
+    # def test_endpoint_fetch_a_meetup_is_reachable(self):
+    #     """Test API can get a specific meetup record (GET request)"""
+    #     res = self.client.get('api/v1/meetups/1')       
 
-        self.assertEqual(res.status_code, 203)
+    #     self.assertEqual(res.status_code, 203)
 
     def test_endpoint_get_all_meetups_is_reachable(self):
         """Test API can fetch all upcoming meetup records (GET request)"""
