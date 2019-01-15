@@ -1,4 +1,4 @@
-import pdb
+# import pdb
 
 import datetime
 
@@ -122,12 +122,6 @@ class QuestionerStorage():
                 self.add_new_item_record(list_name, item, current_list)
 
     def update_item_record(self, item, current_list):
-        # get record of current id
-        # pop from list
-        # add updated item to list
-        # return item
-        pdb.set_trace()
-
         current_idx = current_list.index(item)
         current_list.pop(current_idx)
         current_list.append(item)

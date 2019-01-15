@@ -84,18 +84,20 @@ def upvote_question(question_id):
 
 @question_view_blueprint.route('/questions/<question_id>/downvote', methods=['PATCH'])
 def downvote_question(question_id):
-    # the plan
-    # get votes from question
-    # decrease by 1
-    # submit to storage
-    # if storage ok, return
-    # else return error and notification to retry later
-    return jsonify({
-        "status": 201,
-        "data": [{
-            "meetup": '',
-            "title": '',
-            "body": '',
-            "votes": ''
-        }]
-    }), 202
+    question_record = db.get_record(int(question_id), db.question_list)
+    votes = int(question_record['votes'])
+    if votes > 0:
+        votes -= 1
+        question_record['votes'] = votes
+
+        response = db.save_item('questions', question_record, 'update')
+
+        return jsonify({
+            "status": 201,
+            "data": [response]
+        }), 202
+    else:
+        return jsonify({
+            "status": 201,
+            "data": [question_record]
+        }), 202
