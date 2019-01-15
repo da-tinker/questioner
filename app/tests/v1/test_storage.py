@@ -111,7 +111,7 @@ class TestQuestionerStorageFunctions(unittest.TestCase):
         self.assertIn('id', output)
         self.assertEqual(4, output['id'])
         self.assertIn('createdOn', output)
-        self.assertEqual(1547334591.917148, output['createdOn'])
+        self.assertEqual(datetime.datetime.fromtimestamp(input_2).strftime('%d-%m-%Y'), output['createdOn'])
 
     def test_storage_method_add_to_list_appends_new_item_record_to_list(self):
         """Test that the new meetup record is added to the items list"""
