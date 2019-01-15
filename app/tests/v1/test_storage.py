@@ -208,10 +208,29 @@ class TestQuestionerStorageFunctions(unittest.TestCase):
     
     def test_storage_method_get_record_returns_record_of_type_dict(self):
         """Test that a record(dict) is returned"""
+        input_1 = { "topic": "Q2 Meetup",
+                    "location": "Nairobi",
+                    "happeningOn": "17/01/2019",
+                    "images": [],
+                    "Tags": []
+                }
+        
+        input_2 = {
+                    "topic": "Q1 Meetup",
+                    "location": "Nairobi",
+                    "happeningOn": "17/01/2019",
+                    "images": [],
+                    "Tags": []
+                }
 
-        output = self.storage.get_record('meetups', 0)
+        output_1 = self.storage.save_item('meetups', input_1, 'add_new')
+        output_2 = self.storage.save_item('meetups', input_2, 'add_new')
+
+        output = self.storage.get_record(output_1['id'], self.storage.meetup_list)
+        output_ = self.storage.get_record(output_2['id'], self.storage.meetup_list)
         
         assert type(output) == dict
+        assert type(output_) == dict
     
     def test_storage_method_get_record_returns_record_of_specified_id(self):
         """Test that a record(dict) of specified id is returned"""
@@ -234,9 +253,8 @@ class TestQuestionerStorageFunctions(unittest.TestCase):
         output_1 = self.storage.save_item('meetups', input_1, 'add_new')
         output_2 = self.storage.save_item('meetups', input_2, 'add_new')
 
-        
-        output = self.storage.get_record('meetups', output_1['id'])
-        output_ = self.storage.get_record('meetups', output_2['id'])
+        output = self.storage.get_record(output_1['id'], self.storage.meetup_list)
+        output_ = self.storage.get_record(output_2['id'], self.storage.meetup_list)
         
         self.assertEqual(output_1['id'], output['id'])
         self.assertEqual(output_2['id'], output_['id'])
@@ -244,7 +262,7 @@ class TestQuestionerStorageFunctions(unittest.TestCase):
     def test_storage_method_get_record_returns_error_if_record_not_found(self):
         """Test that a record(dict) is returned"""
 
-        output = self.storage.get_record('meetups', 0)
+        output = self.storage.get_record(102, self.storage.meetup_list)
 
         self.assertIn('error', output)
 

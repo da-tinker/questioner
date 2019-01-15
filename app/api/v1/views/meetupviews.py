@@ -73,7 +73,7 @@ def meetup_validate_request_data(req_data):
 
 @meetup_view_blueprint.route('/meetups/<meetup_id>', methods=['GET'])
 def get_meetup(meetup_id):
-    meetup_record = db.get_record('meetups', int(meetup_id))
+    meetup_record = db.get_record(int(meetup_id), db.meetup_list)
     return jsonify({
         "status": 200,
         "data": [meetup_record]
