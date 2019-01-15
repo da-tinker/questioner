@@ -13,9 +13,8 @@ meetup_view_blueprint = Blueprint('meets', '__name__')
 @meetup_view_blueprint.route('/meetups', methods=['POST'])
 def create_meetup():
     # pdb.set_trace()
-    if request.content_type == 'application/x-www-form-urlencoded':
-        raw_data = request.args
-        data = raw_data.to_dict()
+    raw_data = request.args
+    data = raw_data.to_dict()
 
     res_valid_data = meetup_validate_request_data(data)
 

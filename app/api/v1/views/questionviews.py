@@ -1,4 +1,4 @@
-# import pdb
+import pdb
 # Define blueprint for Question view
 from flask import Blueprint, request, jsonify, make_response
 
@@ -11,12 +11,9 @@ question_view_blueprint = Blueprint('question_bps', '__name__')
 
 @question_view_blueprint.route('/questions', methods=['POST'])
 def create_question():
-    if request.content_type == 'application/x-www-form-urlencoded':
-        raw_data = request.args
-        data = raw_data.to_dict()
-    elif request.content_type == 'application/json':
-        data = request.get_json()
-
+    raw_data = request.args
+    data = raw_data.to_dict()
+    
     res_valid_data = question_validate_request_data(data)
 
     if data == res_valid_data:
