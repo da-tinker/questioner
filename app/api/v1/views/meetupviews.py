@@ -70,7 +70,7 @@ def meetup_validate_request_data(req_data):
             dict_other_fields.update({field: req_data[field]})
     sanitized_data.append(dict_other_fields)
             
-    return validate_request_data(sanitized_data)
+    return validate_request_data(sanitized_data, req_fields)
 
 @meetup_view_blueprint.route('/meetups/<meetup_id>', methods=['GET'])
 def get_meetup(meetup_id):
