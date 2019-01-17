@@ -37,3 +37,15 @@ def validate_request_data(request_data, required_fields_checklist):
                 non_empty.update({field : request_data[1][field]})
 
         return {**request_data[0], **non_empty}
+
+def validate_route_param(route_param):
+    try:
+        type(int(route_param)) == int
+    except:
+        response = {
+            "status": 400,
+            "error" : 'Invalid route parameter'
+        }
+        return response
+    else:
+        return int(route_param)
