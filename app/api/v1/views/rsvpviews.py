@@ -10,39 +10,46 @@ db = QuestionerStorage()
 
 rsvp_view_blueprint = Blueprint('rsvp_bp', '__name__')
 
-
 @rsvp_view_blueprint.route('/meetups/<meetup_id>/rsvps', methods=['POST'])
 def create_rsvp(meetup_id):
-    # pdb.set_trace()
-    # if is_meetup_id_invalid(meetup_id):
-    #     response = {
-    #         "status" : 404,
-    #         "error": "Meetup with id {} not found".format(meetup_id)
-    #     }
-    #     return make_response(jsonify(response), 202)
-
+    if is_meetup_id_invalid(meetup_id):
+        response = {
+            "status" : 404,
+            "error": "Meetup with id {} not found".format(meetup_id)
+        }
+        return make_response(jsonify(response), response['status'])
+    
     raw_data = request.args
     data = raw_data.to_dict()
 
-    res_valid_data = rsvp_validate_request_data(data)
-
     # Ad-hoc validation for response
-    if data['response'] not in ['yes', 'no', 'maybe']:
+    if data['meetup'] != meetup_id:
         response = {
-            'status': '405',
-            'error' : 'Invalid response. Must be one of: yes | no | maybe'
+            'status': 400,
+            'error': 'Meetup ID in request route ({}) does not match meetup id in request data ({}). i.e. {} != {} '.format(meetup_id, data['meetup'], meetup_id, data['meetup'])
         }
-        return make_response(jsonify(response), 202)
+        return make_response(jsonify(response), response['status'])
+    elif data['response'] not in ['yes', 'no', 'maybe']:
+        response = {
+            'status': 400,
+            'error': 'Invalid response. Must be one of: yes | no | maybe'
+        }
+        return make_response(jsonify(response), response['status'])
 
+    # perform standard validation checks
+    res_valid_data = rsvp_validate_request_data(data)
+    
     if data == res_valid_data:
         # send to storage
         response = save(res_valid_data)
-        return make_response(jsonify(response), 202)
+        return make_response(jsonify(response), response['status'])
     else:
-        return make_response(jsonify(res_valid_data), 202)
+        return make_response(jsonify(res_valid_data), res_valid_data['status'])
 
 def save(rsvp_record):
-    # do some processing
+    """Sends the rsvp to be recorded to storage."""
+
+    # send to storage
     db_response = db.save_item('rsvps', rsvp_record, 'add_new')
 
     if all(item in db_response.items() for item in rsvp_record.items()):
@@ -57,14 +64,14 @@ def save(rsvp_record):
         }
 
 def is_meetup_id_invalid(meetup_id):
+    """Checks whether the supplied meetup id exists"""
     exists = False
-    m_id = int(meetup_id)
-    exists = db.check_id_unique(m_id, db.meetup_list)
-    # pdb.set_trace()
+    exists = db.check_id_unique(int(meetup_id), db.meetup_list)
     return exists
 
 
 def rsvp_validate_request_data(req_data):
+    """Validates the rsvp data received"""
     # data = {
     #             "meetup": 1, required
     #             "user": 2, required
@@ -78,14 +85,19 @@ def rsvp_validate_request_data(req_data):
 
     sanitized_data = []
 
+    # get the required fields' data and put in own dictionary
     for field in req_fields:
         if field in req_data:
             dict_req_fields.update({field: req_data[field]})
+    # append required fields dictionary to sanitized_data list
     sanitized_data.append(dict_req_fields)
 
+    # get the non required fields' data and put in own dictionary
     for field in other_fields:
         if field in req_data:
             dict_other_fields.update({field: req_data[field]})
+    # append non required fields dictionary to sanitized_data list
     sanitized_data.append(dict_other_fields)
 
+# send sanitized_data list to actual validation function and return response
     return validate_request_data(sanitized_data, req_fields)

@@ -24,7 +24,9 @@ def create_question():
         return make_response(jsonify(res_valid_data), 202)
 
 def save(question_record):
-    # do some processing
+    """Sends the question to be added to storage."""
+
+    # send to storage
     db_response = db.save_item('questions', question_record, 'add_new')
 
     if all(item in db_response.items() for item in question_record.items()):
@@ -39,6 +41,7 @@ def save(question_record):
         }
 
 def question_validate_request_data(req_data):
+    """Validates the question data received"""
     # data = {
     #             "createdBy": 0, Integer
     #             "meetup": 0, Integer
@@ -54,40 +57,30 @@ def question_validate_request_data(req_data):
 
     sanitized_data = []
 
+    # get the required fields' data and put in own dictionary
     for field in req_fields:
         if field in req_data:
             dict_req_fields.update({field: req_data[field]})    
-    
+    # append required fields dictionary to sanitized_data list
     sanitized_data.append(dict_req_fields)
 
+    # get the non required fields' data and put in own dictionary
     for field in other_fields:
         if field in req_data:
             dict_other_fields.update({field: req_data[field]})
+    # append non required fields dictionary to sanitized_data list
     sanitized_data.append(dict_other_fields)
-    # pdb.set_trace()
+
+    # send sanitized_data list to actual validation function and return response
     return validate_request_data(sanitized_data, req_fields)
 
 @question_view_blueprint.route('/questions/<question_id>/upvote', methods=['PATCH'])
 def upvote_question(question_id):
-    # pdb.set_trace()
+
     question_record = db.get_record(int(question_id), db.question_list)
-    votes = int(question_record['votes'])
-    votes += 1
-    question_record['votes'] = votes
-
-    response = db.save_item('questions', question_record, 'update')
-
-    return jsonify({
-        "status": 201,
-        "data": [response]
-    }), 202
-
-@question_view_blueprint.route('/questions/<question_id>/downvote', methods=['PATCH'])
-def downvote_question(question_id):
-    question_record = db.get_record(int(question_id), db.question_list)
-    votes = int(question_record['votes'])
-    if votes > 0:
-        votes -= 1
+    if 'error' not in question_record:
+        votes = int(question_record['votes'])
+        votes += 1
         question_record['votes'] = votes
 
         response = db.save_item('questions', question_record, 'update')
@@ -97,7 +90,35 @@ def downvote_question(question_id):
             "data": [response]
         }), 202
     else:
+        status_code = question_record['status']
         return jsonify({
-            "status": 201,
+            "status": status_code,
             "data": [question_record]
-        }), 202
+        }), status_code
+
+@question_view_blueprint.route('/questions/<question_id>/downvote', methods=['PATCH'])
+def downvote_question(question_id):
+    question_record = db.get_record(int(question_id), db.question_list)
+    if 'error' not in question_record:
+        votes = int(question_record['votes'])
+        if votes > 0:
+            votes -= 1
+            question_record['votes'] = votes
+
+            response = db.save_item('questions', question_record, 'update')
+
+            return jsonify({
+                "status": 201,
+                "data": [response]
+            }), 202
+        else:
+            return jsonify({
+                "status": 201,
+                "data": [question_record]
+            }), 202
+    else:
+        status_code = question_record['status']
+        return jsonify({
+            "status": status_code,
+            "data": [question_record]
+        }), status_code
