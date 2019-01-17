@@ -179,7 +179,7 @@ class TestQuestionerStorageFunctions(unittest.TestCase):
     def test_storage_method_save_item_returns_new_item(self):
         """Test that newly created record is returned by save_item on successful save"""
 
-        input_1 = {   "id": 1,
+        input_1 = {   #"id": 1,
                     "topic": "Q1 Meetup",
                     "location": "Nairobi",
                     "happeningOn": "17/01/2019",
@@ -187,7 +187,7 @@ class TestQuestionerStorageFunctions(unittest.TestCase):
                     "Tags": [],
                 }
 
-        expected_output = { "id": 1,
+        expected_output = { #"id": 1,
                             "topic": "Q1 Meetup",
                             "location": "Nairobi",
                             "happeningOn": "17/01/2019",

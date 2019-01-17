@@ -5,23 +5,25 @@ import datetime
 class QuestionerStorage():
     """Defines the storage class"""
     
+    # static properties to be available to all instances of the class
+    meetup_list = []
+    rsvp_list = []
+    question_list = []
+
     def __init__(self):
-        self.meetup_list = []
-        self.rsvp_list = []
-        self.question_list = []
-        
+            
         self.record_u_n_id = 0
 
     def save_item(self, list_name, item, action_type):
         
         if list_name == 'meetups':
-            list_to_update = self.meetup_list
+            list_to_update = QuestionerStorage.meetup_list
         
         if list_name == 'rsvps':
-            list_to_update = self.rsvp_list
+            list_to_update = QuestionerStorage.rsvp_list
         
         if list_name == 'questions':
-            list_to_update = self.question_list
+            list_to_update = QuestionerStorage.question_list
 
         if action_type == 'add_new':
             return self.add_new_item_record(list_name, item, list_to_update)
@@ -70,10 +72,10 @@ class QuestionerStorage():
         if list_name == 'meetups':
             return list(self.meetup_list)
     
-    def get_record(self, item_id, current_list):
+    def get_record(self, item_id, list_to_update):
         found_rec = []
 
-        for item_record in current_list:
+        for item_record in list_to_update:
             if item_record['id'] == item_id:
                 found_rec.append(item_record)
 
@@ -81,6 +83,7 @@ class QuestionerStorage():
             return found_rec[0]
         elif len(found_rec) == 0:
             message = {
+                "status" : 404,
                 "error": "No record found for id {}".format(item_id)
             }
         else:
@@ -89,41 +92,41 @@ class QuestionerStorage():
             }
         return message
 
-    def add_new_item_record(self, list_name, item, current_list):
+    def add_new_item_record(self, list_name, item, list_to_update):
         if self.record_u_n_id > 0:
-                if self.check_id_unique(self.record_u_n_id, current_list):
+                if self.check_id_unique(self.record_u_n_id, list_to_update):
 
                     created_on = datetime.datetime.now().timestamp()
                     new_item_record = self.set_id_and_creation_time(
                         self.record_u_n_id, created_on, item
                     )
-                    self.add_to_list(new_item_record, current_list)
+                    self.add_to_list(new_item_record, list_to_update)
                     self.record_u_n_id = 0
                     # pdb.set_trace()
                     return new_item_record
 
                 else:
-                    self.add_new_item_record(list_name, item, current_list)
+                    self.add_new_item_record(list_name, item, list_to_update)
 
         else:
-            new_id = self.generate_id(current_list)
-            if self.check_id_unique(new_id, current_list):
+            new_id = self.generate_id(list_to_update)
+            if self.check_id_unique(new_id, list_to_update):
 
                 created_on = datetime.datetime.now().timestamp()
                 new_item_record = self.set_id_and_creation_time(
                     new_id, created_on, item
                 )
-                self.add_to_list(new_item_record, current_list)
+                self.add_to_list(new_item_record, list_to_update)
                 self.record_u_n_id = 0
                 # pdb.set_trace()
                 return new_item_record
             else:
-                self.record_u_n_id = self.generate_id(current_list)
-                self.add_new_item_record(list_name, item, current_list)
+                self.record_u_n_id = self.generate_id(list_to_update)
+                self.add_new_item_record(list_name, item, list_to_update)
 
-    def update_item_record(self, item, current_list):
-        current_idx = current_list.index(item)
-        current_list.pop(current_idx)
-        current_list.append(item)
+    def update_item_record(self, item, list_to_update):
+        current_idx = list_to_update.index(item)
+        list_to_update.pop(current_idx)
+        list_to_update.append(item)
         
-        return self.get_record(item['id'], current_list)
+        return self.get_record(item['id'], list_to_update)
