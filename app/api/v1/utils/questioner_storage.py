@@ -12,7 +12,7 @@ class QuestionerStorage():
 
     def __init__(self):
             
-        self.record_u_n_id = 0
+        self.record_new_id_not_unique = 0
 
     def save_item(self, list_name, item, action_type):
         
@@ -93,15 +93,15 @@ class QuestionerStorage():
         return message
 
     def add_new_item_record(self, list_name, item, list_to_update):
-        if self.record_u_n_id > 0:
-                if self.check_id_unique(self.record_u_n_id, list_to_update):
+        if self.record_new_id_not_unique > 0:
+                if self.check_id_unique(self.record_new_id_not_unique, list_to_update):
 
                     created_on = datetime.datetime.now().timestamp()
                     new_item_record = self.set_id_and_creation_time(
-                        self.record_u_n_id, created_on, item
+                        self.record_new_id_not_unique, created_on, item
                     )
                     self.add_to_list(new_item_record, list_to_update)
-                    self.record_u_n_id = 0
+                    self.record_new_id_not_unique = 0
                     # pdb.set_trace()
                     return new_item_record
 
@@ -117,11 +117,11 @@ class QuestionerStorage():
                     new_id, created_on, item
                 )
                 self.add_to_list(new_item_record, list_to_update)
-                self.record_u_n_id = 0
+                self.record_new_id_not_unique = 0
                 # pdb.set_trace()
                 return new_item_record
             else:
-                self.record_u_n_id = self.generate_id(list_to_update)
+                self.record_new_id_not_unique = self.generate_id(list_to_update)
                 self.add_new_item_record(list_name, item, list_to_update)
 
     def update_item_record(self, item, list_to_update):
