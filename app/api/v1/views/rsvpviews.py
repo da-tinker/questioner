@@ -10,30 +10,35 @@ db = QuestionerStorage()
 
 rsvp_view_blueprint = Blueprint('rsvp_bp', '__name__')
 
-
 @rsvp_view_blueprint.route('/meetups/<meetup_id>/rsvps', methods=['POST'])
 def create_rsvp(meetup_id):
-    # pdb.set_trace()
-    # if is_meetup_id_invalid(meetup_id):
-    #     response = {
-    #         "status" : 404,
-    #         "error": "Meetup with id {} not found".format(meetup_id)
-    #     }
-    #     return make_response(jsonify(response), 202)
-
+    if is_meetup_id_invalid(meetup_id):
+        response = {
+            "status" : 404,
+            "error": "Meetup with id {} not found".format(meetup_id)
+        }
+        return make_response(jsonify(response), response['status'])
+    
     raw_data = request.args
     data = raw_data.to_dict()
 
-    res_valid_data = rsvp_validate_request_data(data)
-
     # Ad-hoc validation for response
-    if data['response'] not in ['yes', 'no', 'maybe']:
+    if data['meetup'] != meetup_id:
         response = {
-            'status': '400',
-            'error' : 'Invalid response. Must be one of: yes | no | maybe'
+            'status': 400,
+            'error': 'Meetup ID in request route ({}) does not match meetup id in request data ({}). i.e. {} != {} '.format(meetup_id, data['meetup'], meetup_id, data['meetup'])
+        }
+        return make_response(jsonify(response), response['status'])
+    elif data['response'] not in ['yes', 'no', 'maybe']:
+        response = {
+            'status': 400,
+            'error': 'Invalid response. Must be one of: yes | no | maybe'
         }
         return make_response(jsonify(response), response['status'])
 
+    # perform standard validation checks
+    res_valid_data = rsvp_validate_request_data(data)
+    
     if data == res_valid_data:
         # send to storage
         response = save(res_valid_data)
@@ -59,10 +64,9 @@ def save(rsvp_record):
         }
 
 def is_meetup_id_invalid(meetup_id):
+    """Checks whether the supplied meetup id exists"""
     exists = False
-    m_id = int(meetup_id)
-    exists = db.check_id_unique(m_id, db.meetup_list)
-    # pdb.set_trace()
+    exists = db.check_id_unique(int(meetup_id), db.meetup_list)
     return exists
 
 
