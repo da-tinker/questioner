@@ -1,9 +1,8 @@
-import pdb
 # Define blueprint for Question view
 from flask import Blueprint, request, jsonify, make_response
 
 from app.api.v1.models import Question
-from app.api.v1.utils import QuestionerStorage, validate_request_data
+from app.api.v1.utils import QuestionerStorage, validate_request_data, validate_route_param
 
 db = QuestionerStorage()
 
@@ -77,7 +76,13 @@ def question_validate_request_data(req_data):
 @question_view_blueprint.route('/questions/<question_id>/upvote', methods=['PATCH'])
 def upvote_question(question_id):
 
-    question_record = db.get_record(int(question_id), db.question_list)
+    # check id in route 
+    valid_id = validate_route_param(question_id)
+    if type(valid_id) != int:
+        return jsonify(valid_id), valid_id['status']
+
+    # fetch record with validated id
+    question_record = db.get_record(valid_id, db.question_list)
     if 'error' not in question_record:
         votes = int(question_record['votes'])
         votes += 1
@@ -98,7 +103,13 @@ def upvote_question(question_id):
 
 @question_view_blueprint.route('/questions/<question_id>/downvote', methods=['PATCH'])
 def downvote_question(question_id):
-    question_record = db.get_record(int(question_id), db.question_list)
+    # check id in route
+    valid_id = validate_route_param(question_id)
+    if type(valid_id) != int:
+        return jsonify(valid_id), valid_id['status']
+
+    # fetch record with validated id
+    question_record = db.get_record(valid_id, db.question_list)
     if 'error' not in question_record:
         votes = int(question_record['votes'])
         if votes > 0:

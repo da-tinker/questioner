@@ -4,7 +4,7 @@
 from flask import Blueprint, request, jsonify, make_response
 
 from app.api.v1.models import Meetup
-from app.api.v1.utils import QuestionerStorage, validate_request_data
+from app.api.v1.utils import QuestionerStorage, validate_request_data, validate_route_param
 
 db = QuestionerStorage()
 
@@ -79,7 +79,14 @@ def meetup_validate_request_data(req_data):
 
 @meetup_view_blueprint.route('/meetups/<meetup_id>', methods=['GET'])
 def get_meetup(meetup_id):
-    meetup_record = db.get_record(int(meetup_id), db.meetup_list)
+    # check meetup id in route
+    valid_param = validate_route_param(meetup_id)
+    if type(valid_param) != int:
+        return jsonify(valid_param), valid_param['status']
+
+    # fetch meetup record
+    meetup_record = db.get_record(valid_param, db.meetup_list)
+    
     if 'error' in meetup_record:
         return jsonify(meetup_record), meetup_record['status']
 
