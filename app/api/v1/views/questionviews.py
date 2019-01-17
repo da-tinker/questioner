@@ -95,11 +95,7 @@ def upvote_question(question_id):
             "data": [response]
         }), 202
     else:
-        status_code = question_record['status']
-        return jsonify({
-            "status": status_code,
-            "data": [question_record]
-        }), status_code
+        jsonify(question_record), question_record['status']
 
 @question_view_blueprint.route('/questions/<question_id>/downvote', methods=['PATCH'])
 def downvote_question(question_id):
@@ -128,8 +124,4 @@ def downvote_question(question_id):
                 "data": [question_record]
             }), 202
     else:
-        status_code = question_record['status']
-        return jsonify({
-            "status": status_code,
-            "data": [question_record]
-        }), status_code
+        return jsonify(question_record), question_record['status']
