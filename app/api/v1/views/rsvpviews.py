@@ -29,20 +29,22 @@ def create_rsvp(meetup_id):
     # Ad-hoc validation for response
     if data['response'] not in ['yes', 'no', 'maybe']:
         response = {
-            'status': '405',
+            'status': '400',
             'error' : 'Invalid response. Must be one of: yes | no | maybe'
         }
-        return make_response(jsonify(response), 202)
+        return make_response(jsonify(response), response['status'])
 
     if data == res_valid_data:
         # send to storage
         response = save(res_valid_data)
-        return make_response(jsonify(response), 202)
+        return make_response(jsonify(response), response['status'])
     else:
-        return make_response(jsonify(res_valid_data), 202)
+        return make_response(jsonify(res_valid_data), res_valid_data['status'])
 
 def save(rsvp_record):
-    # do some processing
+    """Sends the rsvp to be recorded to storage."""
+
+    # send to storage
     db_response = db.save_item('rsvps', rsvp_record, 'add_new')
 
     if all(item in db_response.items() for item in rsvp_record.items()):
@@ -65,6 +67,7 @@ def is_meetup_id_invalid(meetup_id):
 
 
 def rsvp_validate_request_data(req_data):
+    """Validates the rsvp data received"""
     # data = {
     #             "meetup": 1, required
     #             "user": 2, required
@@ -78,14 +81,19 @@ def rsvp_validate_request_data(req_data):
 
     sanitized_data = []
 
+    # get the required fields' data and put in own dictionary
     for field in req_fields:
         if field in req_data:
             dict_req_fields.update({field: req_data[field]})
+    # append required fields dictionary to sanitized_data list
     sanitized_data.append(dict_req_fields)
 
+    # get the non required fields' data and put in own dictionary
     for field in other_fields:
         if field in req_data:
             dict_other_fields.update({field: req_data[field]})
+    # append non required fields dictionary to sanitized_data list
     sanitized_data.append(dict_other_fields)
 
+# send sanitized_data list to actual validation function and return response
     return validate_request_data(sanitized_data, req_fields)

@@ -26,7 +26,9 @@ def create_meetup():
         return make_response(jsonify(res_valid_data), 202)
 
 def save(meetup_record):
-    # do some processing
+    """Sends the meetup to be added to storage."""
+
+    # send to storage
     db_response = db.save_item('meetups', meetup_record, 'add_new')
 
     if all(item in db_response.items() for item in meetup_record.items()):
@@ -40,8 +42,8 @@ def save(meetup_record):
             "error": 'An error occurred while saving the record.'
         }
 
-
 def meetup_validate_request_data(req_data):
+    """Validates the meetup data received"""
     # data = {
     #             "topic": "Q1 Meetup", required
     #             "location": "Nairobi", required
@@ -58,24 +60,28 @@ def meetup_validate_request_data(req_data):
 
     sanitized_data = []
 
+    # get the required fields' data and put in own dictionary
     for field in req_fields:
         if field in req_data:
             dict_req_fields.update({field: req_data[field]}) 
+    # append required fields dictionary to sanitized_data list
     sanitized_data.append(dict_req_fields)
 
-
+    # get the non required fields' data and put in own dictionary
     for field in other_fields:
         if field in req_data:
             dict_other_fields.update({field: req_data[field]})
+    # append non required fields dictionary to sanitized_data list
     sanitized_data.append(dict_other_fields)
-            
+
+    # send sanitized_data list to actual validation function and return response
     return validate_request_data(sanitized_data, req_fields)
 
 @meetup_view_blueprint.route('/meetups/<meetup_id>', methods=['GET'])
 def get_meetup(meetup_id):
     meetup_record = db.get_record(int(meetup_id), db.meetup_list)
     if 'error' in meetup_record:
-        return jsonify(meetup_record, 404)
+        return jsonify(meetup_record), meetup_record['status']
 
     return jsonify({
         "status": 200,
