@@ -4,7 +4,7 @@ import unittest
 import os
 import json
 
-from .contexts import validate_request_data
+from .contexts import validate_request_data, validate_route_param
 
 class TestUtilitiesFunctions(unittest.TestCase):
     """This class represents the utilities test case"""
@@ -12,7 +12,8 @@ class TestUtilitiesFunctions(unittest.TestCase):
     def setUp(self):
         """Define test variables and initialize app."""
         self.validate_request_data = validate_request_data
-        
+        self.validate_route_param = validate_route_param
+
     def test_validate_required_fields_present(self):
         """Test that required fields are present"""
         input_meetup =  [   {   "topic": "Required is present",
@@ -75,6 +76,22 @@ class TestUtilitiesFunctions(unittest.TestCase):
         output = self.validate_request_data(input_meetup, input_2)
 
         self.assertTrue(all(item in output.items() for item in expected_output.items()))       
+
+    def test_method_validate_route_param_returns_int(self):
+        """Test that the route param can be converted to int"""
+        input_1 = '1'
+
+        output = self.validate_route_param(input_1)
+
+        assert type(output) == int
+    
+    def test_method_validate_route_param_returns_error_if_not_int(self):
+        """Test that the route param can be converted to int"""
+        input_1 = ''
+
+        output = self.validate_route_param(input_1)
+
+        self.assertIn('error', output)
 
     def tearDown(self):
         """teardown all initialized variables."""

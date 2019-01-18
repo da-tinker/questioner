@@ -1,10 +1,8 @@
-# import pdb
-
 # Define blueprint for rsvp view
 from flask import Blueprint, request, jsonify, make_response
 
 from app.api.v1.models import rsvp
-from app.api.v1.utils import QuestionerStorage, validate_request_data
+from app.api.v1.utils import QuestionerStorage, validate_request_data, validate_route_param
 
 db = QuestionerStorage()
 
@@ -12,18 +10,25 @@ rsvp_view_blueprint = Blueprint('rsvp_bp', '__name__')
 
 @rsvp_view_blueprint.route('/meetups/<meetup_id>/rsvps', methods=['POST'])
 def create_rsvp(meetup_id):
-    if is_meetup_id_invalid(meetup_id):
+    # check meetup_id in route can be converted to int
+    valid_id = validate_route_param(meetup_id)
+    if type(valid_id) != int:
+        return jsonify(valid_id), valid_id['status']
+    
+    # check if meetup_id is for existing meetup     
+    if is_meetup_id_invalid(valid_id):
         response = {
             "status" : 404,
-            "error": "Meetup with id {} not found".format(meetup_id)
+            "error": "Meetup with id {} not found".format(valid_id)
         }
         return make_response(jsonify(response), response['status'])
     
+    # extract request data and convert to dictionary
     raw_data = request.args
     data = raw_data.to_dict()
 
     # Ad-hoc validation for response
-    if data['meetup'] != meetup_id:
+    if data['meetup'] != valid_id:
         response = {
             'status': 400,
             'error': 'Meetup ID in request route ({}) does not match meetup id in request data ({}). i.e. {} != {} '.format(meetup_id, data['meetup'], meetup_id, data['meetup'])
