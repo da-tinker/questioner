@@ -16,25 +16,30 @@ class TestMeetupsEndpoint(unittest.TestCase):
                 
     def test_meetup_creation(self):
         """Test API can create a meetup (POST request)"""
-        res = self.client.post('api/v1/meetups', data = { "id": 1,
-                                                            "createdOn": "10/01/2019",
-                                                            "location": "Nairobi",
-                                                            "images": [],
-                                                            "topic": "Q1 Meetup",
-                                                            "happeningOn": "17/01/2019",
-                                                            "Tags": [],
-                                                        })
+        res = self.client.post('api/v1/meetups',
+                                data = json.dumps({
+                                    "topic": "Q1 Meetup",
+                                    "location": "Nairobi",
+                                    "happeningOn": "17/01/2019",
+                                    "tags": []
+                                }),
+                                content_type='application/json'
+        )
+
         self.assertEqual(res.status_code, 202)
 
     def test_endpoint_create_question(self):
         """Test API can create a question (POST request)"""
-        res = self.client.post('api/v1/questions', data = { "createdOn": "storage to provide",
-                                                            "createdBy": "001",
-                                                            "meetup": "Q1 Meetup",
-                                                            "title": 'Test title',
-                                                            "body": "Swali langu ni je",
-                                                            "votes": "17/01/2019"
-                                                        })       
+        res = self.client.post('api/v1/questions',
+                                data = json.dumps({ 
+                                    "createdBy": "001",
+                                    "meetup": "Q1 Meetup",
+                                    "title": 'Test title',
+                                    "body": "Swali langu ni je",
+                                    "votes": 0
+                                }),
+                                content_type='application/json'
+        )       
 
         self.assertEqual(res.status_code, 202)
 

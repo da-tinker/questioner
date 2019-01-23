@@ -4,7 +4,7 @@ import unittest
 import os
 import json
 
-from .contexts import validate_request_data, validate_route_param
+from .contexts import validate_request_data, validate_route_param, invalid_param, check_is_empty
 
 class TestUtilitiesFunctions(unittest.TestCase):
     """This class represents the utilities test case"""
@@ -13,6 +13,8 @@ class TestUtilitiesFunctions(unittest.TestCase):
         """Define test variables and initialize app."""
         self.validate_request_data = validate_request_data
         self.validate_route_param = validate_route_param
+        self.invalid_param = invalid_param
+        self.check_is_empty = check_is_empty
 
     def test_validate_required_fields_present(self):
         """Test that required fields are present"""
@@ -76,6 +78,20 @@ class TestUtilitiesFunctions(unittest.TestCase):
         output = self.validate_request_data(input_meetup, input_2)
 
         self.assertTrue(all(item in output.items() for item in expected_output.items()))       
+    
+    def test_method_check_is_empty_returns_error_with_status_400(self):
+        """Test that the check_is_empty method returns an error with status code 400"""
+        
+        input_data =  ''
+        expected_output = {
+            "status": 400,
+            "error": "No data provided"
+        }
+
+        output = self.check_is_empty(input_data)
+
+        # assert that the expected keys and values as above are present in output
+        self.assertTrue(all(item in output.items() for item in expected_output.items()))
 
     def test_method_validate_route_param_returns_int(self):
         """Test that the route param can be converted to int"""
@@ -92,6 +108,33 @@ class TestUtilitiesFunctions(unittest.TestCase):
         output = self.validate_route_param(input_1)
 
         self.assertIn('error', output)
+
+    def test_method_invalid_param_returns_a_dict_with_error_key(self):
+        """Test that the invalid_param method returns a dict that contains an 'error' key and status is 400"""
+
+        input_1_invalid_param = {
+            'topic': '',
+            'location': '',
+            'happening_on': ''
+        }
+        input_2_expected_param = {
+            'topic': '',
+            'location': '',
+            'happeningOn': ''
+        }
+
+        expected_status_code = 400
+        expected_error_msg = 'Invalid parameter(s):'
+
+        output = self.invalid_param(input_1_invalid_param, input_2_expected_param)
+
+
+        assert type(output) == dict
+        self.assertIn('status', output)
+        self.assertIn('error', output)
+        self.assertEqual(expected_status_code, output['status'])
+        self.assertIn(expected_error_msg, output['error'])
+
 
     def tearDown(self):
         """teardown all initialized variables."""
