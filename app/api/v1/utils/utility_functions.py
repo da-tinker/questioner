@@ -1,3 +1,5 @@
+allowed_content_types = ['application/x-www-form-urlencoded', 'application/json']
+
 def validate_request_data(request_data, required_fields_checklist):
     # request_data = [  {
     #                       "required_field_1": "datatype", 
@@ -49,3 +51,38 @@ def validate_route_param(route_param):
         return response
     else:
         return int(route_param)
+
+def invalid_param(supplied_data, valid_data):
+    """Returns the invalid paramters that have been supplied in the request"""
+
+    invalid_param = []
+    response = {}
+
+    # first, check that some data has been supplied
+    data = check_is_empty(supplied_data)
+    if 'error' in data:
+        return data
+
+    # some data is present, get the invalid parameters
+    for field in data:
+        if field not in valid_data:
+            invalid_param.append(field)
+
+        response = {
+            "status": 400,
+            "error": 'Invalid parameter(s): {}'.format(invalid_param)
+        }
+    return response
+
+
+def check_is_empty(supplied_data):
+    """Returns an error message if supplied data is empty, else, returns the data received"""
+
+    if supplied_data is None or not supplied_data:
+        response = {
+            "status": 400,
+            "error": "No data provided"
+        }
+        return response
+    else:
+        return supplied_data

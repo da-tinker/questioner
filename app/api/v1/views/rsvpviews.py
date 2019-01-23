@@ -2,7 +2,7 @@
 from flask import Blueprint, request, jsonify, make_response
 
 from app.api.v1.models import rsvp
-from app.api.v1.utils import QuestionerStorage, validate_request_data, validate_route_param
+from app.api.v1.utils import QuestionerStorage, validate_request_data, validate_route_param, invalid_param, allowed_content_types, check_is_empty
 
 db = QuestionerStorage()
 
@@ -10,46 +10,66 @@ rsvp_view_blueprint = Blueprint('rsvp_bp', '__name__')
 
 @rsvp_view_blueprint.route('/meetups/<meetup_id>/rsvps', methods=['POST'])
 def create_rsvp(meetup_id):
+    response = {}
+    data = {}
+
     # check meetup_id in route can be converted to int
-    valid_id = validate_route_param(meetup_id)
-    if type(valid_id) != int:
-        return jsonify(valid_id), valid_id['status']
+    validated_meetup_id = validate_route_param(meetup_id)
+    if type(validated_meetup_id) != int:
+        return jsonify(validated_meetup_id), validated_meetup_id['status']
     
     # check if meetup_id is for existing meetup     
-    if is_meetup_id_invalid(valid_id):
+    if is_meetup_id_invalid(validated_meetup_id):
         response = {
             "status" : 404,
-            "error": "Meetup with id {} not found".format(valid_id)
+            "error": "Meetup with id {} not found".format(validated_meetup_id)
         }
         return make_response(jsonify(response), response['status'])
+        
+    # Get request data
+    if request.content_type not in allowed_content_types:
+        response = {
+            'status': 400,
+            'error': 'Invalid Content_Type request header'
+        }
+        return make_response(jsonify(response), response['status'])
+    elif request.args:
+        raw_data = request.args
+        data = raw_data.to_dict()
+    else:
+        # content-type is ok and no url data has been set, try for json data present
+        # if content-type is application/json but no data is supplied
+        # then the exception will be raised otherwise if the content-type is
+        # 'application/x-www-form-urlencoded' but no data is supplied
+        # then the exception will not be raised
+        try:
+            data = request.json
+        except:
+            response = {
+                'status': 400,
+                'error': "Request data invalid! Possibly no data supplied"
+            }
+            return make_response(jsonify(response), response['status'])
     
-    # extract request data and convert to dictionary
-    raw_data = request.args
-    data = raw_data.to_dict()
-
-    # Ad-hoc validation for response
-    if data['meetup'] != valid_id:
-        response = {
-            'status': 400,
-            'error': 'Meetup ID in request route ({}) does not match meetup id in request data ({}). i.e. {} != {} '.format(meetup_id, data['meetup'], meetup_id, data['meetup'])
-        }
-        return make_response(jsonify(response), response['status'])
-    elif data['response'] not in ['yes', 'no', 'maybe']:
-        response = {
-            'status': 400,
-            'error': 'Invalid response. Must be one of: yes | no | maybe'
-        }
-        return make_response(jsonify(response), response['status'])
-
     # perform standard validation checks
-    res_valid_data = rsvp_validate_request_data(data)
-    
+    res_valid_data = rsvp_validate_request_data(data, validated_meetup_id)
+
+    # process data if valid, else, return validation findings
     if data == res_valid_data:
         # send to storage
         response = save(res_valid_data)
-        return make_response(jsonify(response), response['status'])
+        return make_response(jsonify(response), 202)
     else:
-        return make_response(jsonify(res_valid_data), res_valid_data['status'])
+        # request data is invalid
+        if 'error' in res_valid_data:
+            # some required fields are not present or are empty
+            return make_response(jsonify(res_valid_data), res_valid_data['status'])
+        else:
+            # invalid parameters present in request data
+            # get the invalid parameters and return
+            response = invalid_param(data, res_valid_data)
+
+            return make_response(jsonify(response), response['status'])
 
 def save(rsvp_record):
     """Sends the rsvp to be recorded to storage."""
@@ -74,14 +94,47 @@ def is_meetup_id_invalid(meetup_id):
     exists = db.check_id_unique(int(meetup_id), db.meetup_list)
     return exists
 
-
-def rsvp_validate_request_data(req_data):
+def rsvp_validate_request_data(req_data, meetup_id):
     """Validates the rsvp data received"""
     # data = {
     #             "meetup": 1, required
     #             "user": 2, required
     #             "response": "yes | no | maybe", required
     #         }
+    # 
+    # parse the recevied data to check for empty or none
+    received_data = check_is_empty(req_data)
+    # exit if indeed data is empty else check that response value is allowed
+    if 'error' in received_data:
+        return received_data
+    # Confirm that the meetup supplied in route matches the id in request data
+    elif 'meetup' in received_data:
+        # check if meetup id can be parsed as an int
+        try:
+            parsed_meetup_id = int(received_data['meetup'])
+        except:
+            response = {
+                "status": 400,
+                "error": "Invalid meetup id: {}".format(received_data['meetup'])
+            }
+            return response
+        else:
+            # check if parsed meetup id matches the one in route
+            if parsed_meetup_id != meetup_id:
+                response = {
+                    'status': 400,
+                    'error': 'Meetup ID in request route ({}) does not match meetup id in request data ({}). i.e. {} != {} '.format(meetup_id, received_data['meetup'], meetup_id, received_data['meetup'])
+                }
+                return response
+    # Confirm that the supplied value for response is what is expected
+    if 'response' in received_data and received_data['response'] not in ['yes', 'no', 'maybe']:
+        response = {
+            'status': 400,
+            'error': 'Invalid response. Must be one of: yes | no | maybe'
+        }
+        return response
+
+    # all is ok. Perform standard validation checks
     req_fields = ['meetup', 'user', 'response']
     other_fields = []
 

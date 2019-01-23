@@ -17,7 +17,7 @@ class TestRsvpsEndpointFunctions(unittest.TestCase):
     def test_is_meetup_id_invalid_returns_true_if_meetup_exists(self):
         """Test that meetup with specified id exists"""
 
-        self.assertTrue(self.rsvp_is_meetup_id_invalid(1))
+        self.assertTrue(self.rsvp_is_meetup_id_invalid(100))
 
     def tearDown(self):
         """teardown all initialized variables."""

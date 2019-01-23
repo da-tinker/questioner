@@ -21,15 +21,15 @@ class TestQuestionerStorageFunctions(unittest.TestCase):
 
     def test_storage_has_property_meetup_list(self):
         """Test that storage object has meetups list property"""
-        self.assertTrue(self.storage.meetup_list == [])
-    
+        self.assertTrue(hasattr(self.storage, 'meetup_list'))
+        
     def test_storage_has_property_rsvp_list(self):
         """Test that storage object has rsvps list property"""
-        self.assertTrue(self.storage.rsvp_list == [])
+        self.assertTrue(hasattr(self.storage, 'rsvp_list'))
     
     def test_storage_has_property_question_list(self):
-        """Test that storage object has rsvps list property"""
-        self.assertTrue(self.storage.question_list == [])
+        """Test that storage object has question list property"""
+        self.assertTrue(hasattr(self.storage, 'question_list'))
             
     def test_storage_has_method_property_save_item(self):
         """Test that storage object has property save_item method"""
