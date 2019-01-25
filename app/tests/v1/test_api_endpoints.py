@@ -1,6 +1,6 @@
 import unittest
 import os
-import json #, pdb
+import json, pdb
 
 from .contexts import create_api_server, QuestionerStorage
 
@@ -14,6 +14,91 @@ class TestMeetupsEndpoint(unittest.TestCase):
 
         self.storage = QuestionerStorage()
                 
+    def test_endpoint_create_meetup_returns_json(self):
+        """Test API returns error if content_type is incorrect in request"""
+        res = self.client.post(
+            'api/v1/meetups',
+            data = json.dumps({
+                "topic": "Q1 Meetup",
+                "location": "Nairobi",
+                "happeningOn": "17/01/2019",
+                "tags": []
+            }),
+            content_type='application/jsony'
+        )
+        self.assertTrue(res.is_json)
+    
+    def test_endpoint_create_meetup_returns_error_if_content_type_wrong(self):
+        """Test API returns error if content_type is incorrect in request"""
+        res = self.client.post(
+            'api/v1/meetups',
+            data = json.dumps({
+                "topic": "Q1 Meetup",
+                "location": "Nairobi",
+                "happeningOn": "17/01/2019",
+                "tags": []
+            }),
+            content_type='application/jsony'
+        )
+        expected_output = {
+            'status': 400,
+            'error': 'Invalid Content_Type request header'
+        }
+
+        self.assertTrue(all(item in res.json.items() for item in expected_output.items() ))
+        self.assertEqual(res.status_code, 400)
+    
+    def test_endpoint_create_meetup_returns_error_if_no_request_data(self):
+        """Test API returns error if no data is present in request"""
+        res = self.client.post(
+            'api/v1/meetups',
+            data = json.dumps({}),
+            content_type='application/json'
+        )
+        expected_output = {
+            'status': 400,
+            'error': "No data provided"
+        }
+
+        self.assertTrue(all(item in res.json.items() for item in expected_output.items() ))
+        self.assertEqual(res.status_code, 400)
+    
+    def test_endpoint_create_meetup_returns_error_if_no_json_request_data_and_content_type_is_json(self):
+        """Test API returns error if content_type is json and no json data in request"""
+        res = self.client.post(
+            'api/v1/meetups',
+            data = {},
+            content_type='application/json'
+        )
+        expected_output = {
+            'status': 400,
+            'error': "Request data invalid! No JSON data!"
+        }
+
+        self.assertTrue(all(item in res.json.items() for item in expected_output.items() ))
+        self.assertEqual(res.status_code, 400)
+    
+    def test_endpoint_create_meetup_that_method_save_returns_error_if_db_save_not_successful(self):
+        """Test API returns error if there was a problem saving new meetup to db """
+        res = self.client.post(
+            'api/v1/meetups',
+            data = json.dumps({
+                "topic": "Q1 Meetup",
+                "location": "Nairobi",
+                "happeningOn": "17/01/2019",
+                "tags": []
+            }),
+            content_type='application/json'
+        )
+        expected_output = {
+            "status": 503,
+            "error": 'An error occurred while saving the record.'
+        }
+
+        if 'error' in res.json:
+            self.assertTrue(all(item in res.json.items() for item in expected_output.items() ))
+            self.assertEqual(res.status_code, 503, '503 status code not returned')
+    
     def test_meetup_creation(self):
         """Test API can create a meetup (POST request)"""
         res = self.client.post('api/v1/meetups',
@@ -26,7 +111,7 @@ class TestMeetupsEndpoint(unittest.TestCase):
                                 content_type='application/json'
         )
 
-        self.assertEqual(res.status_code, 202)
+        self.assertEqual(res.status_code, 201)
 
     def test_endpoint_create_question(self):
         """Test API can create a question (POST request)"""
@@ -86,7 +171,7 @@ class TestMeetupsEndpoint(unittest.TestCase):
         """Test API can fetch all upcoming meetup records (GET request)"""
         res = self.client.get('api/v1/meetups/upcoming/')       
 
-        self.assertEqual(res.status_code, 203)
+        self.assertEqual(res.status_code, 200)
     
     def tearDown(self):
         """teardown all initialized variables."""

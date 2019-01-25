@@ -34,7 +34,7 @@ def create_meetup():
         except:
             response = {
                 'status': 400,
-                'error' : "Request data invalid! Possibly no data supplied"
+                'error': "Request data invalid! No JSON data!"
             }
             return make_response(jsonify(response), response['status'])
 
@@ -45,7 +45,7 @@ def create_meetup():
     if data == res_valid_data:
         # send to storage
         response = save(res_valid_data)
-        return make_response(jsonify(response), 202)
+        return make_response(jsonify(response), response['status'])
     else:
         # request data is invalid
         if 'error' in res_valid_data:
@@ -134,7 +134,7 @@ def get_meetup(meetup_id):
     return jsonify({
         "status": 200,
         "data": [meetup_record]
-    }), 203
+    }), 200
 
 @meetup_view_blueprint.route('/meetups/upcoming/', methods=['GET'])
 def get_all_upcoming_meetups():
@@ -144,5 +144,4 @@ def get_all_upcoming_meetups():
     return jsonify({
         "status": 200,
         "data": meetups
-    }), 203
-    
+    }), 200    
