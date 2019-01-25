@@ -136,6 +136,42 @@ class TestMeetupsEndpoint(unittest.TestCase):
     #                                                             })       
 
     #     self.assertEqual(res.status_code, 202)
+    
+    def test_endpoint_make_rsvp_returns_json(self):
+        """Test API endpoint returns a json response"""
+        res = self.client.post(
+            'api/v1/meetups/1/rsvps',
+            data = json.dumps({
+                "meetup": "Q1 Meetup",
+                "user": 'Test user',
+                "response": "Yes | No | Maybe",
+            })
+        )       
+
+        self.assertTrue(res.is_json)
+    
+    def test_endpoint_make_rsvp_returns_error_if_meetup_id_not_exist(self):
+        """Test API endpoint returns a json response"""
+        meetup_id = 100
+        res = self.client.post(
+            'api/v1/meetups/{}/rsvps'.format(meetup_id),
+            data = json.dumps({
+                "meetup": "Q1 Meetup",
+                "user": 'Test user',
+                "response": "Yes | No | Maybe",
+            })
+        )       
+        
+        expected_output = {
+            "status": 404,
+            "error": "Meetup with id {} not found".format(meetup_id)
+        }
+
+        self.assertTrue(
+            all(item in res.json.items() for item in expected_output.items()),
+            'Output received does not match output expected'     
+        )
+        self.assertEqual(res.status_code, 404)
 
     # def test_endpoint_upvote_question_is_reachable(self):
     #     """Test API can upvote a question (PATCH request)"""
