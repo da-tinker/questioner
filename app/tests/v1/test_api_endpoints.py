@@ -126,7 +126,7 @@ class TestMeetupsEndpoint(unittest.TestCase):
                                 content_type='application/json'
         )       
 
-        self.assertEqual(res.status_code, 202)
+        self.assertEqual(res.status_code, 201)
 
     # def test_endpoint_make_rsvp_is_reachable(self):
     #     """Test API can create a rsvp for user (POST request)"""

@@ -25,7 +25,7 @@ def create_question():
     if data == res_valid_data:
         # send to storage
         response = save(res_valid_data)
-        return make_response(jsonify(response), 202)
+        return make_response(jsonify(response), response['status'])
     else:
         # return error from validation findings
         response = endpoint_error_response(data, res_valid_data)
@@ -112,9 +112,9 @@ def upvote_question(question_id):
         response = db.save_item('questions', question_record, 'update')
 
         return jsonify({
-            "status": 201,
+            "status": 200,
             "data": [response]
-        }), 202
+        }), 200
     else:
         return jsonify(question_record), question_record['status']
 
@@ -141,13 +141,13 @@ def downvote_question(question_id):
             response = db.save_item('questions', question_record, 'update')
 
             return jsonify({
-                "status": 201,
+                "status": 200,
                 "data": [response]
-            }), 202
+            }), 200
         else:
             return jsonify({
-                "status": 201,
+                "status": 200,
                 "data": [question_record]
-            }), 202
+            }), 200
     else:
         return jsonify(question_record), question_record['status']

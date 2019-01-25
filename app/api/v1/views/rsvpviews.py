@@ -38,7 +38,7 @@ def create_rsvp(meetup_id):
     if data == res_valid_data:
         # send to storage
         response = save(res_valid_data)
-        return make_response(jsonify(response), 202)
+        return make_response(jsonify(response), response['status'])
     else:
         # return error from validation findings
         response = endpoint_error_response(data, res_valid_data)
