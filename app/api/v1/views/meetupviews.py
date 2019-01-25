@@ -2,7 +2,7 @@
 from flask import Blueprint, request, jsonify, make_response
 
 from app.api.v1.models import Meetup
-from app.api.v1.utils import QuestionerStorage, validate_request_data, validate_route_param, invalid_param, allowed_content_types, check_is_empty
+from app.api.v1.utils import QuestionerStorage, validate_request_data, validate_route_param, check_is_empty, parse_request, endpoint_error_response
 
 db = QuestionerStorage()
 
@@ -14,29 +14,9 @@ def create_meetup():
     data = {}
 
     # Get request data
-    if request.content_type not in allowed_content_types:
-        response = {
-            'status': 400,
-            'error': 'Invalid Content_Type request header'
-        }
-        return make_response(jsonify(response), response['status'])
-    elif request.args:
-        raw_data = request.args
-        data = raw_data.to_dict()
-    else:
-        # content-type is ok and no url data has been set, try for json data present
-        # if content-type is application/json but no data is supplied
-        # then the exception will be raised otherwise if the content-type is
-        # 'application/x-www-form-urlencoded' but no data is supplied
-        # then the exception will not be raised
-        try:
-            data = request.json
-        except:
-            response = {
-                'status': 400,
-                'error': "Request data invalid! No JSON data!"
-            }
-            return make_response(jsonify(response), response['status'])
+    data = parse_request(request)
+    if type(data) == dict and 'error' in data:
+        return make_response(jsonify(data), data['status'])
 
     # check validity of request data
     res_valid_data = meetup_validate_request_data(data)
@@ -47,16 +27,9 @@ def create_meetup():
         response = save(res_valid_data)
         return make_response(jsonify(response), response['status'])
     else:
-        # request data is invalid
-        if 'error' in res_valid_data:
-            # some required fields are not present or are empty
-            return make_response(jsonify(res_valid_data), res_valid_data['status'])
-        else:
-            # invalid parameters present in request data
-            # get the invalid parameters and return
-            response = invalid_param(data, res_valid_data)
-
-            return make_response(jsonify(response), response['status'])
+        # return error from validation findings
+        response = endpoint_error_response(data, res_valid_data)
+        return make_response(jsonify(response), response['status'])
 
 def save(meetup_record):
     """Sends the meetup to be added to storage."""
