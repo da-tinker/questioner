@@ -577,11 +577,82 @@ class TestMeetupsEndpoint(unittest.TestCase):
         self.assertTrue(all(item in res.json.items() for item in expected_output.items()))
         self.assertEqual(res.status_code, 400)
 
-    # def test_endpoint_fetch_a_meetup_is_reachable(self):
-    #     """Test API can get a specific meetup record (GET request)"""
-    #     res = self.client.get('api/v1/meetups/1')       
+    def test_endpoint_fetch_meetup_returns_json(self):
+        """Test API endpoint returns a json response (GET request)"""
+        # First, create a meetup record
+        meetup_id = 1
+        res_meetup = self.client.get(
+            'api/v1/meetups/{}'.format(meetup_id),
+            data=json.dumps({
+                "topic": "RSVP the Meet",
+                "location": "Nairobi",
+                "happeningOn": "17/01/2019",
+                "tags": []
+            }),
+            content_type='application/json'
+        )
+        meetup = res_meetup.json['data'][0]
+        
+        res = self.client.get(
+            'api/v1/meetups/{}'.format(meetup['id'])
+        )       
 
-    #     self.assertEqual(res.status_code, 203)
+        self.assertTrue(res.is_json)
+    
+    def test_endpoint_fetch_meetup_returns_specified_record(self):
+        """Test API endpoint returns the specified record (GET request)"""
+        # First, create a meetup record
+        res_meetup = self.client.post(
+            'api/v1/meetups',
+            data=json.dumps({
+                "topic": "Return Me",
+                "location": "Nairobi",
+                "happeningOn": "17/01/2019",
+                "tags": []
+            }),
+            content_type='application/json'
+        )
+        meetup = res_meetup.json['data'][0]
+
+        # Next, test fetch meetup endpoint        
+        res = self.client.get(
+            'api/v1/meetups/{}'.format(meetup['id'])
+        )       
+
+
+        self.assertTrue(all(item in res.json['data'][0].items() for item in meetup.items()))
+        self.assertEqual(res.status_code, 200)
+        
+    def test_endpoint_fetch_meetup_returns_error_if_meetup_record_not_found(self):
+        """Test API endpoint returns an error if meetup not found"""
+        
+        meetup_id = 100
+        res = self.client.get('api/v1/meetups/{}'.format(meetup_id))
+
+        expected_output = {
+            "status": 404,
+            "error": "No record found for id {}".format(meetup_id)
+        }
+        # pdb.set_trace()
+        self.assertTrue(
+            all(item in res.json.items() for item in expected_output.items()),
+            'Output received does not match output expected'
+        )
+        self.assertEqual(res.status_code, 404)
+
+    def test_endpoint_fetch_meetup_returns_error_if_route_param_invalid(self):
+        """Test API returns an error if the route param is invalid (PATCH request)"""
+        # Define the expected output
+        expected_output = {
+            "status": 400,
+            "error": 'Invalid route parameter'
+        }
+
+        # Next, test the make rsvp endpoint
+        res = self.client.get('api/v1/meetups/invalid_param')
+
+        self.assertTrue(all(item in res.json.items() for item in expected_output.items()))
+        self.assertEqual(res.status_code, 400)
 
     def test_endpoint_get_all_meetups_is_reachable(self):
         """Test API can fetch all upcoming meetup records (GET request)"""
