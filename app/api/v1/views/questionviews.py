@@ -2,7 +2,7 @@
 from flask import Blueprint, request, jsonify, make_response
 
 from app.api.v1.models import Question
-from app.api.v1.utils import QuestionerStorage, validate_request_data, validate_route_param, invalid_param, allowed_content_types, check_is_empty
+from app.api.v1.utils import QuestionerStorage, validate_request_data, validate_route_param, check_is_empty, parse_request, endpoint_error_response
 
 db = QuestionerStorage()
 
@@ -14,29 +14,9 @@ def create_question():
     data = {}
 
     # Get request data
-    if request.content_type not in allowed_content_types:
-        response = {
-            'status': 400,
-            'error': 'Invalid Content_Type request header'
-        }
-        return make_response(jsonify(response), response['status'])
-    elif request.args:
-        raw_data = request.args
-        data = raw_data.to_dict()
-    else:
-        # content-type is ok and no url data has been set, try for json data present
-        # if content-type is application/json but no data is supplied
-        # then the exception will be raised otherwise if the content-type is
-        # 'application/x-www-form-urlencoded' but no data is supplied
-        # then the exception will not be raised
-        try:
-            data = request.json
-        except:
-            response = {
-                'status': 400,
-                'error': "Request data invalid! Possibly no data supplied"
-            }
-            return make_response(jsonify(response), response['status'])
+    data = parse_request(request)
+    if type(data) == dict and 'error' in data:
+        return make_response(jsonify(data), data['status'])
 
     # check validity of request data
     res_valid_data = question_validate_request_data(data)
@@ -45,18 +25,11 @@ def create_question():
     if data == res_valid_data:
         # send to storage
         response = save(res_valid_data)
-        return make_response(jsonify(response), 202)
+        return make_response(jsonify(response), response['status'])
     else:
-        # request data is invalid
-        if 'error' in res_valid_data:
-            # some required fields are not present or are empty
-            return make_response(jsonify(res_valid_data), res_valid_data['status'])
-        else:
-            # invalid parameters present in request data
-            # get the invalid parameters and return
-            response = invalid_param(data, res_valid_data)
-
-            return make_response(jsonify(response), response['status'])
+        # return error from validation findings
+        response = endpoint_error_response(data, res_valid_data)
+        return make_response(jsonify(response), response['status'])
 
 def save(question_record):
     """Sends the question to be added to storage."""
@@ -65,6 +38,9 @@ def save(question_record):
     db_response = db.save_item('questions', question_record, 'add_new')
 
     if all(item in db_response.items() for item in question_record.items()):
+        # modify returned data to meet question spec requirements
+        question_record['user'] = question_record.pop('createdBy')
+        
         return {
             "status": 201,
             "data": [question_record]
@@ -91,8 +67,8 @@ def question_validate_request_data(req_data):
     if 'error' in received_data:
         return received_data
     
-    req_fields = ['createdBy', 'meetup', 'title']
-    other_fields = ['body', 'votes']
+    req_fields = ['createdBy', 'meetup', 'title', 'body']
+    other_fields = ['votes']
 
     dict_req_fields = {}
     dict_other_fields = {}
@@ -109,6 +85,19 @@ def question_validate_request_data(req_data):
     # get the non required fields' data and put in own dictionary
     for field in other_fields:
         if field in req_data:
+            # parse votes to int
+            if field == 'votes':
+                try:
+                    int_votes = int(req_data['votes'])
+                except:
+                    response = {
+                        'status': 400,
+                        'error': 'Invalid value for votes'
+                    }
+                    return response
+                # update request data with parsed vote
+                req_data['votes'] = int_votes
+
             dict_other_fields.update({field: req_data[field]})
     # append non required fields dictionary to sanitized_data list
     sanitized_data.append(dict_other_fields)
@@ -139,9 +128,9 @@ def upvote_question(question_id):
         response = db.save_item('questions', question_record, 'update')
 
         return jsonify({
-            "status": 201,
+            "status": 200,
             "data": [response]
-        }), 202
+        }), 200
     else:
         return jsonify(question_record), question_record['status']
 
@@ -168,13 +157,13 @@ def downvote_question(question_id):
             response = db.save_item('questions', question_record, 'update')
 
             return jsonify({
-                "status": 201,
+                "status": 200,
                 "data": [response]
-            }), 202
+            }), 200
         else:
             return jsonify({
-                "status": 201,
+                "status": 200,
                 "data": [question_record]
-            }), 202
+            }), 200
     else:
         return jsonify(question_record), question_record['status']

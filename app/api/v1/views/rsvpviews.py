@@ -2,7 +2,7 @@
 from flask import Blueprint, request, jsonify, make_response
 
 from app.api.v1.models import rsvp
-from app.api.v1.utils import QuestionerStorage, validate_request_data, validate_route_param, invalid_param, allowed_content_types, check_is_empty
+from app.api.v1.utils import QuestionerStorage, validate_request_data, validate_route_param, check_is_empty, parse_request, endpoint_error_response
 
 db = QuestionerStorage()
 
@@ -27,30 +27,10 @@ def create_rsvp(meetup_id):
         return make_response(jsonify(response), response['status'])
         
     # Get request data
-    if request.content_type not in allowed_content_types:
-        response = {
-            'status': 400,
-            'error': 'Invalid Content_Type request header'
-        }
-        return make_response(jsonify(response), response['status'])
-    elif request.args:
-        raw_data = request.args
-        data = raw_data.to_dict()
-    else:
-        # content-type is ok and no url data has been set, try for json data present
-        # if content-type is application/json but no data is supplied
-        # then the exception will be raised otherwise if the content-type is
-        # 'application/x-www-form-urlencoded' but no data is supplied
-        # then the exception will not be raised
-        try:
-            data = request.json
-        except:
-            response = {
-                'status': 400,
-                'error': "Request data invalid! Possibly no data supplied"
-            }
-            return make_response(jsonify(response), response['status'])
-    
+    data = parse_request(request)
+    if type(data) == dict and 'error' in data:
+        return make_response(jsonify(data), data['status'])
+
     # perform standard validation checks
     res_valid_data = rsvp_validate_request_data(data, validated_meetup_id)
 
@@ -58,26 +38,34 @@ def create_rsvp(meetup_id):
     if data == res_valid_data:
         # send to storage
         response = save(res_valid_data)
-        return make_response(jsonify(response), 202)
+        return make_response(jsonify(response), response['status'])
     else:
-        # request data is invalid
-        if 'error' in res_valid_data:
-            # some required fields are not present or are empty
-            return make_response(jsonify(res_valid_data), res_valid_data['status'])
-        else:
-            # invalid parameters present in request data
-            # get the invalid parameters and return
-            response = invalid_param(data, res_valid_data)
-
-            return make_response(jsonify(response), response['status'])
+        # return error from validation findings
+        response = endpoint_error_response(data, res_valid_data)
+        return make_response(jsonify(response), response['status'])
 
 def save(rsvp_record):
     """Sends the rsvp to be recorded to storage."""
+    # convert the meetup and user attributes to int
+    if type(rsvp_record['meetup']) != int:
+        rsvp_record['meetup'] = int(rsvp_record['meetup'])
+    elif type(rsvp_record['user']) != int:
+        rsvp_record['user'] = int(rsvp_record['user'])
 
     # send to storage
     db_response = db.save_item('rsvps', rsvp_record, 'add_new')
 
     if all(item in db_response.items() for item in rsvp_record.items()):
+        # get the meetup record
+        meetup = db.get_record(rsvp_record['meetup'], db.meetup_list)
+        
+        # update the rsvp record being returned with required return attributes
+        status = rsvp_record.pop('response')
+        rsvp_record.update({
+            'status': status,
+            'topic': meetup['topic']
+        })
+
         return {
             "status": 201,
             "data": [rsvp_record]
@@ -89,7 +77,7 @@ def save(rsvp_record):
         }
 
 def is_meetup_id_invalid(meetup_id):
-    """Checks whether the supplied meetup id exists"""
+    """Checks whether the supplied meetup id exists\n Returns boolean"""
     exists = False
     exists = db.check_id_unique(int(meetup_id), db.meetup_list)
     return exists

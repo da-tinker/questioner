@@ -41,6 +41,7 @@ def validate_request_data(request_data, required_fields_checklist):
         return {**request_data[0], **non_empty}
 
 def validate_route_param(route_param):
+    """ Checks that the supplied route parameter can be converted to an int """
     try:
         type(int(route_param)) == int
     except:
@@ -86,3 +87,49 @@ def check_is_empty(supplied_data):
         return response
     else:
         return supplied_data
+
+def parse_request(req):
+    """
+    Validates the request for correct content_type.\n
+    Returns error if content_type invalid else\n
+    returns the data contained in the request
+    
+    """
+    
+    if req.content_type not in allowed_content_types:
+        response = {
+            'status': 400,
+            'error': 'Invalid Content_Type request header'
+        }
+        return response
+    elif req.args:
+        raw_data = req.args
+        data = raw_data.to_dict()
+    else:
+        # content-type is ok and no url data has been set, try for json data present
+        # if content-type is application/json but no data is supplied
+        # then the exception will be raised otherwise if the content-type is
+        # 'application/x-www-form-urlencoded' but no data is supplied
+        # then the exception will not be raised
+        try:
+            data = req.json
+        except:
+            response = {
+                'status': 400,
+                'error': "Request data invalid! No JSON data!"
+            }
+            return response
+
+    # all ok, so return the data
+    return data
+
+def endpoint_error_response(request_data, processed_data):
+    if 'error' in processed_data:
+        # some required fields are not present or are empty
+        return processed_data
+    else:
+        # invalid parameters present in request data
+        # get the invalid parameters and return
+        response = invalid_param(request_data, processed_data)
+
+        return response
