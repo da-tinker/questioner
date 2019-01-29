@@ -38,6 +38,9 @@ def save(question_record):
     db_response = db.save_item('questions', question_record, 'add_new')
 
     if all(item in db_response.items() for item in question_record.items()):
+        # modify returned data to meet question spec requirements
+        question_record['user'] = question_record.pop('createdBy')
+        
         return {
             "status": 201,
             "data": [question_record]
@@ -64,8 +67,8 @@ def question_validate_request_data(req_data):
     if 'error' in received_data:
         return received_data
     
-    req_fields = ['createdBy', 'meetup', 'title']
-    other_fields = ['body', 'votes']
+    req_fields = ['createdBy', 'meetup', 'title', 'body']
+    other_fields = ['votes']
 
     dict_req_fields = {}
     dict_other_fields = {}

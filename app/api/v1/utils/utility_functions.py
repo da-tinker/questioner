@@ -41,6 +41,7 @@ def validate_request_data(request_data, required_fields_checklist):
         return {**request_data[0], **non_empty}
 
 def validate_route_param(route_param):
+    """ Checks that the supplied route parameter can be converted to an int """
     try:
         type(int(route_param)) == int
     except:

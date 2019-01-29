@@ -99,6 +99,7 @@ class QuestionerStorage():
             }
         else:
             message = {
+                "status": 500,
                 "error" : "Multiple records!"
             }
         return message
