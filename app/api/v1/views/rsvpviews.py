@@ -46,11 +46,26 @@ def create_rsvp(meetup_id):
 
 def save(rsvp_record):
     """Sends the rsvp to be recorded to storage."""
+    # convert the meetup and user attributes to int
+    if type(rsvp_record['meetup']) != int:
+        rsvp_record['meetup'] = int(rsvp_record['meetup'])
+    elif type(rsvp_record['user']) != int:
+        rsvp_record['user'] = int(rsvp_record['user'])
 
     # send to storage
     db_response = db.save_item('rsvps', rsvp_record, 'add_new')
 
     if all(item in db_response.items() for item in rsvp_record.items()):
+        # get the meetup record
+        meetup = db.get_record(rsvp_record['meetup'], db.meetup_list)
+        
+        # update the rsvp record being returned with required return attributes
+        status = rsvp_record.pop('response')
+        rsvp_record.update({
+            'status': status,
+            'topic': meetup['topic']
+        })
+
         return {
             "status": 201,
             "data": [rsvp_record]

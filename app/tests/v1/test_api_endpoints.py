@@ -170,7 +170,6 @@ class TestMeetupsEndpoint(unittest.TestCase):
             self.assertTrue(all(item in res.json.items() for item in expected_output.items() ))
             self.assertEqual(res.status_code, 503, '503 status code not returned')
     
-    
     def test_endpoint_create_question_creates_new_question_and_returns_created_question(self):
         """Test API can create a question and returns the created question (POST request)"""
         res = self.client.post('api/v1/questions',
@@ -405,17 +404,142 @@ class TestMeetupsEndpoint(unittest.TestCase):
 
     def test_endpoint_make_rsvp_returns_json(self):
         """Test API endpoint returns a json response"""
-        res = self.client.post(
-            'api/v1/meetups/1/rsvps',
-            data = json.dumps({
-                "meetup": "Q1 Meetup",
-                "user": 'Test user',
-                "response": "Yes | No | Maybe",
-            })
-        )       
+        res = self.client.post('api/v1/meetups/1/rsvps')       
 
         self.assertTrue(res.is_json)
     
+    def test_endpoint_make_rsvp_returns_error_if_no_request_data(self):
+        """Test API returns error if no data is present in request"""
+        # First, create a meetup record
+        res_meetup = self.client.post(
+            'api/v1/meetups',
+            data=json.dumps({
+                "topic": "RSVP the Meet",
+                "location": "Nairobi",
+                "happeningOn": "17/01/2019",
+                "tags": []
+            }),
+            content_type='application/json'
+        )
+        meetup = res_meetup.json['data'][0]
+        # pdb.set_trace()
+        # Next, test the make rsvp endpoint
+        res = self.client.post(
+            'api/v1/meetups/{}/rsvps'.format(meetup['id']),
+            data=json.dumps({}),
+            content_type='application/json'
+        )
+        expected_output = {
+            'status': 400,
+            'error': "No data provided"
+        }
+
+        self.assertTrue(all(item in res.json.items() for item in expected_output.items()))
+        self.assertEqual(res.status_code, 400)
+
+    def test_endpoint_make_rsvp_returns_error_if_no_json_request_data_and_content_type_is_json(self):
+        """Test API returns error if content_type is json and no json data in request"""
+        # First, create a meetup record
+        res_meetup = self.client.post(
+            'api/v1/meetups',
+            data=json.dumps({
+                "topic": "RSVP the Meet",
+                "location": "Nairobi",
+                "happeningOn": "17/01/2019",
+                "tags": []
+            }),
+            content_type='application/json'
+        )
+        meetup = res_meetup.json['data'][0]
+        
+        # Next, test the make rsvp endpoint
+        res = self.client.post(
+            'api/v1/meetups/{}/rsvps'.format(meetup['id']),
+            data={},
+            content_type='application/json'
+        )
+        expected_output = {
+            'status': 400,
+            'error': "Request data invalid! No JSON data!"
+        }
+
+        self.assertTrue(all(item in res.json.items() for item in expected_output.items()))
+        self.assertEqual(res.status_code, 400)
+
+    def test_endpoint_make_rsvp_that_method_save_returns_error_if_db_save_not_successful(self):
+        """Test API returns error if there was a problem saving new question to db """
+        # First, create a meetup record
+        res_meetup = self.client.post(
+            'api/v1/meetups',
+            data=json.dumps({
+                "topic": "RSVP the Meet",
+                "location": "Nairobi",
+                "happeningOn": "17/01/2019",
+                "tags": []
+            }),
+            content_type='application/json'
+        )
+        meetup = res_meetup.json['data'][0]
+
+        # Next, test the make rsvp endpoint
+        res = self.client.post(
+            'api/v1/meetups/{}/rsvps'.format(meetup['id']),
+            data = json.dumps({
+                "meetup": meetup['id'],
+                "user": 1,
+                "response": 'maybe'
+            }),
+            content_type='application/json'
+        )
+        expected_output = {
+            "status": 503,
+            "error": 'An error occurred while saving the record.'
+        }
+
+        if 'error' in res.json:
+            self.assertTrue(all(item in res.json.items() for item in expected_output.items()))
+            self.assertEqual(res.status_code, 503, '503 status code not returned')
+
+    def test_endpoint_make_rsvp_creates_rsvp_and_returns_created_rsvp(self):
+        """Test API can create a rsvp and returns the created rsvp (POST request)"""
+        # First, create a meetup record
+        res_meetup = self.client.post(
+            'api/v1/meetups',
+            data=json.dumps({
+                "topic": "RSVP the Meet",
+                "location": "Nairobi",
+                "happeningOn": "17/01/2019",
+                "tags": []
+            }),
+            content_type='application/json'
+        )
+        meetup = res_meetup.json['data'][0]
+
+        # Next, test the make rsvp endpoint
+        res = self.client.post(
+            'api/v1/meetups/{}/rsvps'.format(meetup['id']), 
+            data = json.dumps({
+                "meetup": meetup['id'],
+                "user": 1,
+                "response": 'maybe'
+            }),
+            content_type='application/json'
+        )
+        expected_output = {
+            "status": 201,
+            "data": [
+                {
+                    "meetup": meetup['id'], 
+                    "topic": meetup['topic'],
+                    "status": "maybe"
+                }
+            ]
+        }
+
+        self.assertEqual(res.json['status'], expected_output['status'])
+        self.assertTrue(all(item in res.json['data'][0].items() for item in expected_output['data'][0].items()))
+        self.assertEqual(res.status_code, 201)
+
     def test_endpoint_make_rsvp_returns_error_if_meetup_id_not_exist(self):
         """Test API endpoint returns a json response"""
         meetup_id = 100
@@ -424,7 +548,7 @@ class TestMeetupsEndpoint(unittest.TestCase):
             data = json.dumps({
                 "meetup": "Q1 Meetup",
                 "user": 'Test user',
-                "response": "Yes | No | Maybe",
+                "response": "Yes | No | Maybe"
             })
         )       
         
@@ -439,17 +563,19 @@ class TestMeetupsEndpoint(unittest.TestCase):
         )
         self.assertEqual(res.status_code, 404)
 
-    
+    def test_endpoint_make_rsvp_returns_error_if_route_param_invalid(self):
+        """Test API returns an error if the route param is invalid (PATCH request)"""
+        # Define the expected output
+        expected_output = {
+            "status": 400,
+            "error": 'Invalid route parameter'
+        }
 
-    # def test_endpoint_downvote_question_is_reachable(self):
-    #     """Test API can downvote a question (PATCH request)"""
-    #     res = self.client.patch('api/v1/questions/1/downvote', data = {    "meetup": "Q1 Meetup",
-    #                                                                     "title": 'Test title',
-    #                                                                     "body": "Swali langu ni je",
-    #                                                                     "votes": "0"
-    #                                                             })       
+        # Next, test the make rsvp endpoint
+        res = self.client.post('api/v1/meetups/invalid_param/rsvps')
 
-    #     self.assertEqual(res.status_code, 202)
+        self.assertTrue(all(item in res.json.items() for item in expected_output.items()))
+        self.assertEqual(res.status_code, 400)
 
     # def test_endpoint_fetch_a_meetup_is_reachable(self):
     #     """Test API can get a specific meetup record (GET request)"""
