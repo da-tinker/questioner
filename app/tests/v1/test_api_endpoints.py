@@ -282,6 +282,126 @@ class TestMeetupsEndpoint(unittest.TestCase):
 
         self.assertTrue(all(item in res.json.items() for item in expected_output.items()))
         self.assertEqual(res.status_code, 404)
+    
+    def test_endpoint_downvote_question_returns_json(self):
+        """Test API gives a json response (PATCH request)"""
+        # First, create a question record
+        input_1 = {
+            "meetup": "Q1 Meetup",
+            "title": 'Test title',
+            "body": "Swali langu ni je",
+            "votes": "0"
+        }
+        new_question_record = self.storage.save_item('questions', input_1, 'add_new')
+
+        # Next, test the downvote question endpoint
+        res = self.client.patch(
+            'api/v1/questions/{}/downvote'.format(new_question_record['id'])
+        )
+
+        self.assertTrue(res.is_json)
+    
+    def test_endpoint_downvote_question_decrements_votes_for_question_by_one(self):
+        """Test API decrements question's votes by one (PATCH request)"""
+        # Define the expected output
+        expected_output = {
+            "status": 200,
+            "data": [
+                {
+                    "meetup": "Q1 Meetup",
+                    "title": 'Test title',
+                    "body": "Swali langu ni je",
+                    "votes": 1
+                }
+            ]
+        }
+        # Then, create a question record
+        input_1 = {
+            "meetup": "Q1 Meetup",
+            "title": 'Test title',
+            "body": "Swali langu ni je",
+            "votes": 2
+        }        
+        new_question_record = self.storage.save_item('questions', input_1, 'add_new')
+
+        # Next, test the downvote question endpoint
+        res = self.client.patch(
+            'api/v1/questions/{}/downvote'.format(new_question_record['id'])
+        )
+
+        self.assertEqual(res.json['status'], expected_output['status'])
+        self.assertEqual(res.json['data'][0]['votes'], expected_output['data'][0]['votes'])
+        self.assertEqual(res.status_code, 200)
+    
+    def test_endpoint_downvote_question_does_not_decrement_if_votes_are_zero(self):
+        """Test API does not decrement the votes if votes are zero (PATCH request)"""
+        # Define the expected output
+        expected_output = {
+            "status": 200,
+            "data": [
+                {
+                    "meetup": "Q1 Meetup",
+                    "title": 'Test title',
+                    "body": "Swali langu ni je",
+                    "votes": 0
+                }
+            ]
+        }
+        # Then, create a question record
+        res_new_question = self.client.post('api/v1/questions',
+                                                data=json.dumps({
+                                                    "createdBy": 1,
+                                                    "meetup": 1,
+                                                    "title": 'Test title',
+                                                    "body": "Swali langu ni je",
+                                                    "votes": "0"
+                                                }),
+                                                content_type='application/json'
+        )
+        new_question_record = res_new_question.json['data'][0]
+
+        # Next, test the downvote question endpoint
+        res = self.client.patch(
+            'api/v1/questions/{}/downvote'.format(new_question_record['id'])
+        )
+
+        self.assertEqual(res.json['status'], expected_output['status'])
+        self.assertEqual(res.json['data'][0]['votes'], expected_output['data'][0]['votes'])
+        self.assertEqual(res.status_code, 200)
+    
+    def test_endpoint_downvote_question_returns_error_if_route_param_invalid(self):
+        """Test API returns an error if the route param is invalid (PATCH request)"""
+        # Define the expected output
+        expected_output = {
+            "status": 400,
+            "error": 'Invalid route parameter'
+        }
+        
+        # Next, test the downvote question endpoint
+        res = self.client.patch(
+            'api/v1/questions/invalid_param/downvote'
+        )
+
+        self.assertTrue(all(item in res.json.items() for item in expected_output.items()))
+        self.assertEqual(res.status_code, 400)
+    
+    def test_endpoint_downvote_question_returns_error_if_question_not_found(self):
+        """Test API returns an error if the question id is not found (PATCH request)"""
+        # Define the expected output
+        inexistent_id = 19921
+        
+        expected_output = {
+            "status": 404,
+            "error": "No record found for id {}".format(inexistent_id)
+        }
+        
+        # Next, test the downvote question endpoint
+        res = self.client.patch(
+            'api/v1/questions/{}/downvote'.format(inexistent_id)
+        )
+
+        self.assertTrue(all(item in res.json.items() for item in expected_output.items()))
+        self.assertEqual(res.status_code, 404)
 
     def test_endpoint_make_rsvp_returns_json(self):
         """Test API endpoint returns a json response"""

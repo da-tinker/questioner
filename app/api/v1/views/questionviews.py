@@ -85,6 +85,19 @@ def question_validate_request_data(req_data):
     # get the non required fields' data and put in own dictionary
     for field in other_fields:
         if field in req_data:
+            # parse votes to int
+            if field == 'votes':
+                try:
+                    int_votes = int(req_data['votes'])
+                except:
+                    response = {
+                        'status': 400,
+                        'error': 'Invalid value for votes'
+                    }
+                    return response
+                # update request data with parsed vote
+                req_data['votes'] = int_votes
+
             dict_other_fields.update({field: req_data[field]})
     # append non required fields dictionary to sanitized_data list
     sanitized_data.append(dict_other_fields)
